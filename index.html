@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام البصمة المتكامل | وزارة الأوقاف</title>
+    <meta name="theme-color" content="#0d5c4d">
+    <link rel="manifest" href="manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@400;500;700&family=Aref+Ruqaa:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --primary: #0d5c4d; --bg: #f0f4f8; --card: #ffffff; 
+            --gold: #d4af37; --danger: #ff0000; --text: #334155;
+            --input-bg: #f8fafc; --prayer-bg: #e2e8f0;
+            --dark-red: #8b0000;
+            --info-blue: #2980b9; --info-bg: #ebf5fb;
+            --perm-orange: #d35400; --perm-bg: #fdf2e9;
+        }
+        [data-theme="dark"] {
+            --bg: #0f172a; --card: #1e293b; --text: #f1f5f9;
+            --input-bg: #334155; --prayer-bg: #334155;
+        }
+        
+        body { font-family: 'Tajawal', sans-serif; background-color: var(--bg); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; color: var(--text); transition: 0.3s; min-height: 100vh; }
+        .container { width: 95%; max-width: 700px; background: var(--card); border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); padding: 30px; position: relative; overflow: hidden; margin-top: 20px; padding-bottom: 80px; }
+        
+        .theme-toggle { position: absolute; top: 60px; left: 20px; background: var(--input-bg); border: 2px solid var(--gold); cursor: pointer; font-size: 1.2rem; width: 40px; height: 40px; border-radius: 50%; z-index: 100; display: flex; align-items: center; justify-content: center; }
+        
+        .marquee-wrapper { 
+            background: #fdfaf0; border-bottom: 2px solid var(--gold); overflow: hidden; 
+            padding: 12px 0; margin: -30px -30px 20px -30px; width: calc(100% + 60px); 
+            position: relative; direction: ltr; 
+        }
+        [data-theme="dark"] .marquee-wrapper { background: #334155; border-bottom-color: #10b981; }
+        .marquee-track { display: flex; width: max-content; animation: scrollText 120s linear infinite; }
+        .marquee-content { display: flex; flex-shrink: 0; }
+        .marquee-item { padding: 0 40px; font-weight: 700; color: var(--primary); font-size: 1rem; white-space: nowrap; }
+        [data-theme="dark"] .marquee-item { color: var(--gold); }
+        @keyframes scrollText { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        .date-display { text-align: center; font-family: 'Cairo'; color: var(--text); font-size: 0.9rem; margin-bottom: 5px; opacity: 0.8; }
+        .clock-wrapper { display: flex; align-items: center; justify-content: center; gap: 10px; background: #1e293b; padding: 10px 20px; border-radius: 20px; border: 2px solid #10b981; margin-bottom: 20px; width: fit-content; margin-left: auto; margin-right: auto; }
+        .live-clock { color: #10b981; font-family: 'Cairo'; font-size: 1.6rem; font-weight: 900; letter-spacing: 1px; }
+        
+        .prayer-title { text-align: center; font-family: 'Cairo'; font-weight: 700; font-size: 1rem; color: var(--primary); margin-bottom: 10px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; width: 80%; margin-left: auto; margin-right: auto; }
+        [data-theme="dark"] .prayer-title { color: var(--gold); border-bottom-color: #555; }
+        .prayer-box { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; background: var(--prayer-bg); padding: 8px; border-radius: 15px; margin-bottom: 25px; }
+        .prayer-item { text-align: center; padding: 5px 2px; background: var(--card); border-radius: 8px; }
+        .prayer-name { font-size: 0.75rem; font-weight: bold; margin-bottom: 2px; }
+        .prayer-time { font-family: 'Cairo'; font-size: 0.85rem; font-weight: 700; color: var(--primary); }
+        
+        .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        label { display: block; font-weight: 700; margin-bottom: 6px; font-size: 0.9rem; }
+        select, input { width: 100%; padding: 12px; border: 2px solid rgba(0,0,0,0.05); border-radius: 12px; font-size: 1rem; background: var(--input-bg); color: var(--text); outline: none; box-sizing: border-box; transition: 0.3s; }
+        select:focus, input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(13, 92, 77, 0.1); }
+        
+        .results-header { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10px; margin-bottom: 5px; }
+        .copy-btn { background: var(--input-bg); border: 1px solid #ccc; border-radius: 8px; cursor: pointer; padding: 5px 10px; font-size: 0.8rem; font-weight: bold; color: var(--text); display: none; }
+        
+        .results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .res-box { padding: 15px; border-radius: 20px; text-align: center; color: white; position: relative; overflow: hidden; }
+        .out-bg { background: linear-gradient(135deg, #0d5c4d, #064035); }
+        .stamp-bg { background: linear-gradient(135deg, #ff0000, #b30000); box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4); border: 2px solid #ff4d4d; }
+        .res-val { font-family: 'Cairo'; font-size: 1.4rem; font-weight: 900; margin-top: 5px; }
+        
+        .alert-msg { background: #fff5f5; border: 1px dashed #ff0000; color: #ff0000; padding: 12px; border-radius: 12px; margin-bottom: 15px; text-align: center; font-weight: bold; display: none; }
+        .warning-msg { background: #fff3cd; border: 1px dashed #ffc107; color: #856404; padding: 12px; border-radius: 12px; margin-bottom: 15px; text-align: center; font-weight: bold; display: none; }
+        .deduction-msg { padding: 15px; border-radius: 15px; margin-bottom: 15px; text-align: center; font-weight: bold; display: none; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+
+        .signature-area { margin-top: 40px; padding-top: 20px; text-align: center; border-top: 1px solid rgba(212, 175, 55, 0.2); position: relative; }
+        .signature-area::before { content: '❖'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--card); padding: 0 10px; color: var(--gold); font-size: 1.2rem; }
+        .dev-label { font-size: 0.8rem; color: var(--text); opacity: 0.7; letter-spacing: 1px; margin-bottom: 5px; font-family: 'Tajawal'; }
+        .sig-name { font-family: 'Aref Ruqaa', serif; font-size: 2rem; background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: transparent; font-weight: 700; display: inline-block; position: relative; padding: 5px 0; text-shadow: 0px 2px 3px rgba(0,0,0,0.1); }
+        .code-icon { font-family: monospace; color: var(--primary); font-size: 1.2rem; opacity: 0.5; vertical-align: middle; margin: 0 5px; }
+
+        .fab-btn { position: fixed; bottom: 20px; left: 20px; width: 55px; height: 55px; background: var(--gold); border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: #fff; cursor: pointer; z-index: 2000; border: none; transition: transform 0.2s; }
+        .fab-btn:hover { transform: scale(1.1); }
+        .faq-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+        .faq-content { background: var(--card); width: 90%; max-width: 500px; max-height: 80vh; border-radius: 25px; padding: 25px; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.4); animation: slideUp 0.3s ease-out; }
+        .faq-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .search-box { width: 100%; padding: 12px; border-radius: 15px; border: 2px solid #ddd; margin-bottom: 15px; font-family: 'Tajawal'; }
+        .qa-item { background: var(--input-bg); border-radius: 12px; padding: 15px; margin-bottom: 10px; border: 1px solid rgba(0,0,0,0.05); cursor: pointer; }
+        .qa-q { font-weight: 700; color: var(--primary); display: flex; justify-content: space-between; }
+        .qa-a { font-size: 0.95rem; margin-top: 10px; line-height: 1.6; display: none; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 10px; }
+        .qa-item.active .qa-a { display: block; }
+    </style>
+</head>
+<body onload="init()">
+
+<div class="container">
+    <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+    <div class="marquee-wrapper">
+        <div class="marquee-track" id="marqueeTrack"></div>
+    </div>
+    <div class="date-display" id="dateDisplay"></div>
+    <div class="clock-wrapper">
+        <span style="color:white; font-family:'Cairo'; font-size:0.9rem;">الوقت:</span>
+        <div class="live-clock" id="clock">00:00:00</div>
+    </div>
+    <div class="prayer-title">مواقيت الصلاة حسب توقيت دولة الكويت</div>
+    <div class="prayer-box" id="prayers">
+        <div class="prayer-item"><div class="prayer-name">الفجر</div><div class="prayer-time" id="fajr">--:--</div></div>
+        <div class="prayer-item"><div class="prayer-name">الشروق</div><div class="prayer-time" id="sunrise">--:--</div></div>
+        <div class="prayer-item"><div class="prayer-name">الظهر</div><div class="prayer-time" id="dhuhr">--:--</div></div>
+        <div class="prayer-item"><div class="prayer-name">العصر</div><div class="prayer-time" id="asr">--:--</div></div>
+        <div class="prayer-item"><div class="prayer-name">المغرب</div><div class="prayer-time" id="maghrib">--:--</div></div>
+        <div class="prayer-item"><div class="prayer-name">العشاء</div><div class="prayer-time" id="isha">--:--</div></div>
+    </div>
+
+    <div class="input-row">
+        <div><label>👤 الجنس</label><select id="gender" oninput="calculate()"><option value="female">أنثى</option><option value="male">ذكر</option></select></div>
+        <div><label>🕒 وقت الحضور</label><input type="time" id="actEntry" oninput="calculate()"></div>
+    </div>
+
+    <div class="input-row">
+        <div><label>📝 الاستئذان</label><select id="pType" oninput="calculate()"><option value="none">بدون</option><option value="entry">دخول</option><option value="exit">خروج</option></select></div>
+        <div id="pExtra" style="display:none;"><label id="extraLabel">وقت الدوام الرسمي</label><input type="time" id="pStart" value="07:00" oninput="calculate()"><select id="pExHours" oninput="calculate()" style="display:none;"><option value="1">1 ساعة</option><option value="2">2 ساعة</option><option value="3">3 ساعات</option></select></div>
+    </div>
+
+    <div id="alertMsg" class="alert-msg"></div>
+    <div id="warningMsg" class="warning-msg" style="display:none;"></div>
+    <div id="deductionMsg" class="deduction-msg" style="display:none;"></div>
+
+    <div class="results-header">
+        <label style="margin:0">النتائج:</label>
+        <button id="copyBtn" class="copy-btn" onclick="copyResults()">📋 نسخ التقرير</button>
+    </div>
+    <div class="results-grid">
+        <div class="res-box out-bg"><small>وقت الخروج</small><div class="res-val" id="outVal">--:--</div></div>
+        <div class="res-box stamp-bg"><small>بصمة التواجد</small><div class="res-val" id="stampVal">--:--</div></div>
+    </div>
+
+    <div id="statusLabel" style="margin-top:15px; font-size:0.9rem; font-weight:700; padding:10px; border-radius:12px; text-align:center; display:none;"></div>
+
+    <div class="signature-area">
+        <div class="dev-label">تطوير وبرمجة</div>
+        <span class="code-icon">&lt;/&gt;</span>
+        <span class="sig-name">بدر فلاح المطيري</span>
+        <span class="code-icon">&lt;/&gt;</span>
+    </div>
+</div>
+
+<button class="fab-btn" onclick="toggleFaq()">?</button>
+
+<div class="faq-modal" id="faqModal">
+    <div class="faq-content">
+        <div class="faq-header">
+            <div style="font-family:'Cairo'; font-weight:900; color:var(--primary); font-size:1.3rem;">🤖 المساعد الذكي</div>
+            <button onclick="toggleFaq()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">✕</button>
+        </div>
+        <input type="text" class="search-box" id="faqSearch" placeholder="ابحث في القوانين..." onkeyup="filterFaq()">
+        <div id="faqList"></div>
+    </div>
+</div>
+
+<script>
+    if ('serviceWorker' in navigator) { window.addEventListener('load', function() { navigator.serviceWorker.register('sw.js'); }); }
+
+    const azkarList = [
+        "اللَّهُمَّ بَارِكْ لِي فِي وَقْتِي", "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ", "سُبْحَانَ اللَّهِ الْعَظِيمِ", 
+        "لَا إِلَهَ إِلَّا أَنْتَ سُبْحَانَكَ إِنِّي كُنْتُ مِنَ الظَّالِمِينَ", "اللَّهُمَّ صَلِّ وَسَلِّمْ عَلَى نَبِيِّنَا مُحَمَّدٍ", 
+        "رَبِّ اشْرَحْ لِي صَدْرِي وَيَسِّرْ لِي أَمْرِي", "أَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ"
+    ];
+
+    const faqData = [
+        { q: "كيف يحسب وقت الخروج مع إذن الدخول؟", a: "يُحسب بناءً على **وقت الدوام الرسمي** الذي تختاره (مثلاً 7:00) + ساعات العمل الرسمية. التأخير يُخصم من رصيد الاستئذان، ولا يؤخر وقت انصرافك." },
+        { q: "دخلت متأخراً (بدون إذن) والنظام مغلق؟", a: "إذا تجاوزت 12:01 م (وقت إغلاق النظام) ولم يكن لديك إذن، يُعتبر انقطاعاً عن العمل وتظهر لك رسالة تحذيرية حمراء." },
+        { q: "رصيد الـ 105 دقائق", a: "هو رصيد للتأخيرات البسيطة (بدون إذن). إذا تجاوزت 9:30 يبدأ الخصم منه، وإذا نفد يخصم من الراتب." },
+        { q: "هل إذن الدخول يعفي من البصمة الثالثة؟", a: "ليس بالضرورة. تعفى فقط إذا كان وقت خروجك الرسمي يسبق موعد بصمة التواجد." }
+    ];
+
+    function toggleTheme() { document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
+
+    async function init() {
+        const track = document.getElementById('marqueeTrack');
+        const contentBlock = azkarList.map(z => `<span class="marquee-item">۞ ${z}</span>`).join('');
+        track.innerHTML = `<div class="marquee-content">${contentBlock}</div><div class="marquee-content">${contentBlock}</div>`;
+
+        const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('dateDisplay').innerText = new Date().toLocaleDateString('ar-KW', dateOptions);
+        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-GB'); }, 1000);
+        renderFaq();
+        try {
+            const r = await fetch('https://api.aladhan.com/v1/timingsByCity?city=Kuwait%20City&country=Kuwait&method=10');
+            const d = await r.json();
+            const t = d.data.timings;
+            ['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'].forEach(p => { 
+                if(document.getElementById(p.toLowerCase())) document.getElementById(p.toLowerCase()).innerText = t[p]; 
+            });
+        } catch(e) {}
+    }
+
+    function calculate() {
+        const entry = document.getElementById('actEntry').value;
+        const type = document.getElementById('pType').value;
+        const gen = document.getElementById('gender').value;
+        const alert = document.getElementById('alertMsg');
+        const warning = document.getElementById('warningMsg');
+        const dedMsg = document.getElementById('deductionMsg');
+        const copyBtn = document.getElementById('copyBtn');
+        
+        if(!entry) { copyBtn.style.display = 'none'; return; }
+
+        const [h, m] = entry.split(':').map(Number);
+        const mins = h * 60 + m;
+        
+        alert.style.display = 'none'; warning.style.display = 'none'; dedMsg.style.display = 'none';
+
+        if (mins < 390) { alert.innerText = "⚠️ البصمة لا تعمل قبل 6:30 ص"; alert.style.display = 'block'; return; }
+        if (mins > 720) { alert.innerText = "⚠️ الحد الأقصى للحضور 12:00 م"; alert.style.display = 'block'; return; }
+
+        let outM;
+        const shiftDuration = (gen === 'male') ? 390 : 375; 
+
+        if (type === 'none') {
+            document.getElementById('pExtra').style.display = 'none';
+            if (mins >= 545 && mins <= 570) {
+                warning.innerText = "✅ فترة السماح (تحسب 9:30)"; warning.style.display = 'block';
+            } else if (mins > 570) {
+                const lateMins = mins - 570;
+                dedMsg.style.borderColor = '#ff0000'; dedMsg.style.color = '#c0392b'; dedMsg.style.background = '#ffebeb';
+                dedMsg.innerHTML = `❌ تأخير <b>${lateMins} دقيقة</b>.<br>سيتم خصمها من رصيد التأخير (الـ 105).`;
+                dedMsg.style.display = 'block';
+            }
+            let effectiveEntry = mins;
+            if (mins >= 545 && mins <= 570) effectiveEntry = 570;
+            else if (mins >= 390 && mins <= 420) effectiveEntry = 420;
+            const baseExit = (gen === 'male') ? 810 : 795; 
+            if (effectiveEntry <= 420) outM = baseExit;
+            else outM = baseExit + (effectiveEntry - 420);
+        } else if (type === 'entry') {
+            document.getElementById('pExtra').style.display = 'block';
+            document.getElementById('extraLabel').innerText = "وقت الدوام الرسمي";
+            document.getElementById('pStart').style.display = 'block';
+            document.getElementById('pExHours').style.display = 'none';
+            const [sh, sm] = document.getElementById('pStart').value.split(':').map(Number);
+            const startMins = sh * 60 + sm; 
+            if (mins > startMins) {
+                const usedMins = mins - startMins;
+                const uH = Math.floor(usedMins / 60);
+                const uM = usedMins % 60;
+                dedMsg.style.borderColor = '#e67e22'; dedMsg.style.color = '#d35400'; dedMsg.style.background = '#fdf2e9';
+                dedMsg.innerHTML = `📝 تم خصم <b>${uH} ساعة و ${uM} دقيقة</b><br>من رصيد الاستئذان الشهري.`;
+                dedMsg.style.display = 'block';
+            }
+            outM = startMins + shiftDuration;
+        } else if (type === 'exit') {
+            document.getElementById('pExtra').style.display = 'block';
+            document.getElementById('extraLabel').innerText = "عدد الساعات";
+            document.getElementById('pStart').style.display = 'none';
+            document.getElementById('pExHours').style.display = 'block';
+            let effectiveEntry = mins;
+            if (mins >= 545 && mins <= 570) effectiveEntry = 570;
+            else if (mins >= 390 && mins <= 420) effectiveEntry = 420;
+            const baseExit = (gen === 'male') ? 810 : 795;
+            if (effectiveEntry <= 420) outM = baseExit;
+            else outM = baseExit + (effectiveEntry - 420);
+            outM -= (parseInt(document.getElementById('pExHours').value) * 60);
+            const exH = document.getElementById('pExHours').value;
+            dedMsg.style.borderColor = '#e67e22'; dedMsg.style.color = '#d35400'; dedMsg.style.background = '#fdf2e9';
+            dedMsg.innerHTML = `📝 تم خصم <b>${exH} ساعات</b><br>من رصيد الاستئذان الشهري.`;
+            dedMsg.style.display = 'block';
+        }
+
+        if (outM > 1020) outM = 1020; 
+        document.getElementById('outVal').innerText = fmt(outM);
+        
+        let sStart;
+        if (mins >= 390 && mins <= 420) sStart = 541; 
+        else if (mins >= 545 && mins <= 570) sStart = 661; 
+        else sStart = mins + 121;
+        
+        const stampVal = document.getElementById('stampVal');
+        const status = document.getElementById('statusLabel');
+        status.style.display = 'block';
+        const cutoffPresence = 721; 
+
+        if (outM <= sStart) {
+            stampVal.innerText = "غير مطالب";
+            status.innerText = "✅ معفى: خروجك قبل موعد البصمة";
+            status.style.background = "#27ae60"; status.style.color = "white";
+        } else if (sStart >= cutoffPresence) {
+            stampVal.innerText = "⚠️ النظام مغلق";
+            if (type === 'none') {
+                 status.innerText = "❌ تعذر إثبات التواجد (انقطاع عن العمل)";
+                 status.style.background = "#8b0000"; status.style.color = "white";
+            } else if (type === 'entry') {
+                 status.innerText = "⚠️ النظام مغلق (لديك إذن دخول)";
+                 status.style.background = "#e67e22"; status.style.color = "white";
+            } else {
+                 status.innerText = "⚠️ النظام مغلق (لديك إذن خروج)";
+                 status.style.background = "#e67e22"; status.style.color = "white";
+            }
+        } else {
+            const stampEnd = Math.min(sStart + 60, 1440);
+            stampVal.innerText = fmt(sStart) + " - " + fmt(stampEnd);
+            status.innerText = "⚠️ مطالب ببصمة التواجد";
+            status.style.background = "#e74c3c"; status.style.color = "white";
+        }
+        
+        copyBtn.style.display = 'block'; 
+    }
+
+    function copyResults() {
+        const out = document.getElementById('outVal').innerText;
+        const stamp = document.getElementById('stampVal').innerText;
+        const txt = `📅 نظام البصمة\n🕒 خروج: ${out}\n📍 تواجد: ${stamp}`;
+        navigator.clipboard.writeText(txt).then(() => alert("تم نسخ التقرير!"));
+    }
+
+    function toggleFaq() { document.getElementById('faqModal').style.display = (document.getElementById('faqModal').style.display === 'flex') ? 'none' : 'flex'; }
+    function renderFaq(list = faqData) {
+        document.getElementById('faqList').innerHTML = list.map(item => `
+            <div class="qa-item" onclick="this.classList.toggle('active')">
+                <div class="qa-q">${item.q} <span>▼</span></div><div class="qa-a">${item.a}</div>
+            </div>`).join('');
+    }
+    function filterFaq() {
+        const q = document.getElementById('faqSearch').value.toLowerCase();
+        renderFaq(faqData.filter(i => i.q.includes(q) || i.a.includes(q)));
+    }
+    window.onclick = function(e) { if (e.target == document.getElementById('faqModal')) toggleFaq(); }
+    function fmt(m) { return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`; }
+</script>
+</body>
+</html>
