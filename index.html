@@ -2,154 +2,289 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>نظام البصمة المتكامل | وزارة الأوقاف</title>
-    <meta name="theme-color" content="#0d5c4d">
+    <meta name="theme-color" content="#06140f">
     <link rel="manifest" href="manifest.json">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@400;500;700&family=Aref+Ruqaa:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@400;500;700;800&family=Aref+Ruqaa:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --primary: #0d5c4d; --bg: #f0f4f8; --card: #ffffff; 
-            --gold: #d4af37; --danger: #ff0000; --text: #334155;
-            --input-bg: #f8fafc; --prayer-bg: #e2e8f0;
-            --dark-red: #8b0000;
-            --info-blue: #2980b9; --info-bg: #ebf5fb;
-            --perm-orange: #d35400; --perm-bg: #fdf2e9;
+        /* ===== الألوان: ليلي زمردي (افتراضي) ورملي فاتح ===== */
+        body {
+            --bg: #06140f; --bg-glow1: rgba(16,185,129,.20); --bg-glow2: rgba(233,196,106,.13);
+            --card: rgba(255,255,255,.045); --card-solid: #0c2219; --border: rgba(233,196,106,.16);
+            --text: #eafaf3; --muted: #8fb3a6; --primary: #34d399; --primary-deep: #0d5c4d;
+            --gold: #e9c46a; --gold-deep: #b8892c; --danger: #fb7185; --amber: #fbbf24; --blue: #7dd3fc;
+            --input-bg: rgba(255,255,255,.06); --track: rgba(255,255,255,.07);
+            --shadow: 0 24px 60px rgba(0,0,0,.45); --pattern-op: .055; --on-gold: #1c1404;
         }
-        [data-theme="dark"] {
-            --bg: #0f172a; --card: #1e293b; --text: #f1f5f9;
-            --input-bg: #334155; --prayer-bg: #334155;
+        body[data-theme="light"] {
+            --bg: #f4eee1; --bg-glow1: rgba(13,122,99,.14); --bg-glow2: rgba(184,137,44,.16);
+            --card: rgba(255,253,247,.78); --card-solid: #fffdf7; --border: rgba(13,92,77,.13);
+            --text: #17302a; --muted: #5d746b; --primary: #0d7a63; --primary-deep: #0d5c4d;
+            --gold: #b8892c; --gold-deep: #8a6416; --danger: #e11d48; --amber: #d97706; --blue: #0284c7;
+            --input-bg: #fffaf0; --track: rgba(13,92,77,.09);
+            --shadow: 0 18px 50px rgba(13,92,77,.13); --pattern-op: .07; --on-gold: #fffaf0;
         }
-        
-        body { font-family: 'Tajawal', sans-serif; background-color: var(--bg); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; color: var(--text); transition: 0.3s; min-height: 100vh; }
-        .container { width: 95%; max-width: 700px; background: var(--card); border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); padding: 30px; position: relative; overflow: hidden; margin-top: 20px; padding-bottom: 80px; }
-        
-        .theme-toggle { position: absolute; top: 60px; left: 20px; background: var(--input-bg); border: 2px solid var(--gold); cursor: pointer; font-size: 1.2rem; width: 40px; height: 40px; border-radius: 50%; z-index: 100; display: flex; align-items: center; justify-content: center; }
-        
-        .marquee-wrapper { 
-            background: #fdfaf0; border-bottom: 2px solid var(--gold); overflow: hidden; 
-            padding: 12px 0; margin: -30px -30px 20px -30px; width: calc(100% + 60px); 
-            position: relative; direction: ltr; 
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html { background: #06140f; }
+        body {
+            font-family: 'Tajawal', sans-serif; margin: 0; min-height: 100vh; color: var(--text);
+            background: radial-gradient(900px 500px at 85% -10%, var(--bg-glow1), transparent 60%),
+                        radial-gradient(700px 500px at 0% 110%, var(--bg-glow2), transparent 60%), var(--bg);
+            background-attachment: fixed; transition: background-color .4s, color .4s;
+            padding: max(14px, env(safe-area-inset-top)) 14px 110px;
         }
-        [data-theme="dark"] .marquee-wrapper { background: #334155; border-bottom-color: #10b981; }
+        body::before {
+            content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: var(--pattern-op);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cg fill='none' stroke='%23e9c46a' stroke-width='1.1'%3E%3Crect x='22' y='22' width='28' height='28'/%3E%3Crect x='22' y='22' width='28' height='28' transform='rotate(45 36 36)'/%3E%3Ccircle cx='36' cy='36' r='6'/%3E%3Cpath d='M0 36h8M64 36h8M36 0v8M36 64v8'/%3E%3C/g%3E%3C/svg%3E");
+        }
+        .container { position: relative; z-index: 1; width: 100%; max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 26px; box-shadow: var(--shadow); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); padding: 18px; animation: rise .7s cubic-bezier(.2,.8,.2,1) both; }
+        .container > :nth-child(2) { animation-delay: .05s } .container > :nth-child(3) { animation-delay: .12s }
+        .container > :nth-child(4) { animation-delay: .19s } .container > :nth-child(5) { animation-delay: .26s }
+        .container > :nth-child(6) { animation-delay: .33s }
+        @keyframes rise { from { opacity: 0; transform: translateY(18px) scale(.98); } to { opacity: 1; transform: none; } }
+
+        /* ===== الشريط العلوي ===== */
+        .topbar { display: flex; align-items: center; gap: 12px; padding: 4px 4px 0; animation: rise .6s both; }
+        .topbar img { width: 46px; height: 46px; border-radius: 14px; box-shadow: 0 6px 18px rgba(0,0,0,.3); border: 1px solid var(--border); }
+        .brand { flex: 1; min-width: 0; }
+        .brand h1 { margin: 0; font-family: 'Cairo'; font-weight: 900; font-size: 1.2rem; line-height: 1.3;
+            background: linear-gradient(90deg, var(--gold), var(--primary)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .date-display { font-size: .8rem; color: var(--muted); margin-top: 2px; }
+        .icon-btn { width: 42px; height: 42px; flex: none; border-radius: 14px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-size: 1.1rem; cursor: pointer; display: grid; place-items: center; backdrop-filter: blur(12px); transition: transform .2s; }
+        .icon-btn:active { transform: scale(.92); }
+
+        .marquee-wrapper { overflow: hidden; direction: ltr; border-radius: 16px; padding: 9px 0; background: var(--card); border: 1px solid var(--border);
+            -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); animation: rise .6s .03s both; }
         .marquee-track { display: flex; width: max-content; animation: scrollText 120s linear infinite; }
         .marquee-content { display: flex; flex-shrink: 0; }
-        .marquee-item { padding: 0 40px; font-weight: 700; color: var(--primary); font-size: 1rem; white-space: nowrap; }
-        [data-theme="dark"] .marquee-item { color: var(--gold); }
+        .marquee-item { padding: 0 34px; font-weight: 700; color: var(--gold); font-size: .95rem; white-space: nowrap; }
         @keyframes scrollText { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-        .date-display { text-align: center; font-family: 'Cairo'; color: var(--text); font-size: 0.9rem; margin-bottom: 5px; opacity: 0.8; }
-        .clock-wrapper { display: flex; align-items: center; justify-content: center; gap: 10px; background: #1e293b; padding: 10px 20px; border-radius: 20px; border: 2px solid #10b981; margin-bottom: 20px; width: fit-content; margin-left: auto; margin-right: auto; }
-        .live-clock { color: #10b981; font-family: 'Cairo'; font-size: 1.6rem; font-weight: 900; letter-spacing: 1px; }
-        
-        .prayer-title { text-align: center; font-family: 'Cairo'; font-weight: 700; font-size: 1rem; color: var(--primary); margin-bottom: 10px; border-bottom: 1px dashed #ccc; padding-bottom: 5px; width: 80%; margin-left: auto; margin-right: auto; }
-        [data-theme="dark"] .prayer-title { color: var(--gold); border-bottom-color: #555; }
-        .prayer-box { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; background: var(--prayer-bg); padding: 8px; border-radius: 15px; margin-bottom: 25px; }
-        .prayer-item { text-align: center; padding: 5px 2px; background: var(--card); border-radius: 8px; }
-        .prayer-name { font-size: 0.75rem; font-weight: bold; margin-bottom: 2px; }
-        .prayer-time { font-family: 'Cairo'; font-size: 0.85rem; font-weight: 700; color: var(--primary); }
-        
-        .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-        label { display: block; font-weight: 700; margin-bottom: 6px; font-size: 0.9rem; }
-        select, input { width: 100%; padding: 12px; border: 2px solid rgba(0,0,0,0.05); border-radius: 12px; font-size: 1rem; background: var(--input-bg); color: var(--text); outline: none; box-sizing: border-box; transition: 0.3s; }
-        select:focus, input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(13, 92, 77, 0.1); }
-        
-        .results-header { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10px; margin-bottom: 5px; }
-        .copy-btn { background: var(--input-bg); border: 1px solid #ccc; border-radius: 8px; cursor: pointer; padding: 5px 10px; font-size: 0.8rem; font-weight: bold; color: var(--text); display: none; }
-        
-        .results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .res-box { padding: 15px; border-radius: 20px; text-align: center; color: white; position: relative; overflow: hidden; }
-        .out-bg { background: linear-gradient(135deg, #0d5c4d, #064035); }
-        .stamp-bg { background: linear-gradient(135deg, #ff0000, #b30000); box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4); border: 2px solid #ff4d4d; }
-        .res-val { font-family: 'Cairo'; font-size: 1.4rem; font-weight: 900; margin-top: 5px; }
-        
-        .alert-msg { background: #fff5f5; border: 1px dashed #ff0000; color: #ff0000; padding: 12px; border-radius: 12px; margin-bottom: 15px; text-align: center; font-weight: bold; display: none; }
-        .warning-msg { background: #fff3cd; border: 1px dashed #ffc107; color: #856404; padding: 12px; border-radius: 12px; margin-bottom: 15px; text-align: center; font-weight: bold; display: none; }
-        .deduction-msg { padding: 15px; border-radius: 15px; margin-bottom: 15px; text-align: center; font-weight: bold; display: none; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+        /* ===== بطاقة اليوم (العدّاد الحي) ===== */
+        .hero { --ph: var(--gold); position: relative; overflow: hidden; text-align: center; padding: 18px 16px 20px; transition: box-shadow .6s; }
+        .hero::before { content: ''; position: absolute; inset: -40% -20% auto; height: 120%; pointer-events: none;
+            background: radial-gradient(closest-side, color-mix(in srgb, var(--ph) 22%, transparent), transparent); transition: background .6s; }
+        .hero[data-phase="work"]   { --ph: var(--primary); }
+        .hero[data-phase="stamp"]  { --ph: var(--amber); }
+        .hero[data-phase="urgent"] { --ph: var(--danger); }
+        .hero[data-phase="closed"] { --ph: var(--danger); }
+        .hero[data-phase="done"], .hero[data-phase="plan"] { --ph: var(--blue); }
+        .hero-head { position: relative; display: flex; justify-content: space-between; align-items: center; font-size: .82rem; color: var(--muted); margin-bottom: 4px; }
+        .clock { font-family: 'Cairo'; font-weight: 700; color: var(--text); direction: ltr; font-variant-numeric: tabular-nums; }
+        .clock small { font-size: .75em; color: var(--gold); margin-inline-start: 4px; }
 
-        .signature-area { margin-top: 40px; padding-top: 20px; text-align: center; border-top: 1px solid rgba(212, 175, 55, 0.2); position: relative; }
-        .signature-area::before { content: '❖'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--card); padding: 0 10px; color: var(--gold); font-size: 1.2rem; }
-        .dev-label { font-size: 0.8rem; color: var(--text); opacity: 0.7; letter-spacing: 1px; margin-bottom: 5px; font-family: 'Tajawal'; }
-        .sig-name { font-family: 'Aref Ruqaa', serif; font-size: 2rem; background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; color: transparent; font-weight: 700; display: inline-block; position: relative; padding: 5px 0; text-shadow: 0px 2px 3px rgba(0,0,0,0.1); }
-        .code-icon { font-family: monospace; color: var(--primary); font-size: 1.2rem; opacity: 0.5; vertical-align: middle; margin: 0 5px; }
+        .ring-wrap { position: relative; width: min(270px, 74vw); aspect-ratio: 1; margin: 6px auto 4px; }
+        .ring { width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
+        .ring circle { fill: none; }
+        .ring-orbit { stroke: var(--gold); stroke-width: 1.4; stroke-dasharray: 1.5 9; opacity: .45; transform-origin: 130px 130px; animation: spin 80s linear infinite; }
+        .ring-track { stroke: var(--track); stroke-width: 14; }
+        .ring-stamp { stroke: var(--amber); stroke-width: 5; stroke-linecap: round; opacity: .9; transition: stroke-dasharray .8s, stroke-dashoffset .8s, opacity .4s; }
+        .ring-prog { stroke: var(--ph); stroke-width: 14; stroke-linecap: round; transition: stroke-dasharray .9s cubic-bezier(.2,.8,.2,1), stroke .6s; filter: drop-shadow(0 0 7px color-mix(in srgb, var(--ph) 70%, transparent)); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .ring-center { position: absolute; inset: 16%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+        .phase-chip { white-space: nowrap; font-weight: 800; font-size: .84rem; padding: 6px 12px; border-radius: 999px; color: var(--ph); background: color-mix(in srgb, var(--ph) 14%, transparent); border: 1px solid color-mix(in srgb, var(--ph) 35%, transparent); max-width: 100%; transition: color .6s, background .6s; }
+        .count { font-family: 'Cairo'; font-weight: 900; font-size: clamp(2.1rem, 11vw, 2.75rem); line-height: 1.1; direction: ltr; font-variant-numeric: tabular-nums; letter-spacing: .5px; }
+        .count.word { font-size: clamp(1.15rem, 5.6vw, 1.4rem); direction: rtl; white-space: nowrap; }
+        .count-sub { font-size: .82rem; color: var(--muted); line-height: 1.5; max-width: 190px; }
+        .hero[data-phase="urgent"] .ring-prog, .hero[data-phase="stamp"] .phase-chip { animation: beat 1.6s ease-in-out infinite; }
+        @keyframes beat { 50% { opacity: .55; } }
 
-        .fab-btn { position: fixed; bottom: 20px; left: 20px; width: 55px; height: 55px; background: var(--gold); border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: #fff; cursor: pointer; z-index: 2000; border: none; transition: transform 0.2s; }
-        .fab-btn:hover { transform: scale(1.1); }
-        .faq-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
-        .faq-content { background: var(--card); width: 90%; max-width: 500px; max-height: 80vh; border-radius: 25px; padding: 25px; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.4); animation: slideUp 0.3s ease-out; }
-        .faq-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        .search-box { width: 100%; padding: 12px; border-radius: 15px; border: 2px solid #ddd; margin-bottom: 15px; font-family: 'Tajawal'; }
-        .qa-item { background: var(--input-bg); border-radius: 12px; padding: 15px; margin-bottom: 10px; border: 1px solid rgba(0,0,0,0.05); cursor: pointer; }
-        .qa-q { font-weight: 700; color: var(--primary); display: flex; justify-content: space-between; }
-        .qa-a { font-size: 0.95rem; margin-top: 10px; line-height: 1.6; display: none; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 10px; }
+        .timeline { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); margin: 12px 0 4px; }
+        .timeline::before { content: ''; position: absolute; top: 9px; right: 16.66%; left: 16.66%; height: 2px; background: var(--track); }
+        .tl-item { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+        .tl-dot { width: 18px; height: 18px; border-radius: 50%; background: var(--card-solid); border: 2px solid var(--track); transition: .4s; }
+        .tl-item.done .tl-dot { background: var(--primary); border-color: var(--primary); }
+        .tl-item.now .tl-dot { border-color: var(--ph); background: var(--ph); box-shadow: 0 0 0 6px color-mix(in srgb, var(--ph) 22%, transparent); }
+        .tl-item.off { opacity: .5; }
+        .tl-label { font-size: .75rem; color: var(--muted); font-weight: 700; }
+        .tl-time { font-family: 'Cairo'; font-weight: 800; font-size: .88rem; direction: ltr; }
+
+        .punch { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; margin-top: 14px; padding: 16px; border: none; border-radius: 20px; cursor: pointer;
+            font-family: 'Cairo'; font-weight: 900; font-size: 1.15rem; color: var(--on-gold);
+            background: linear-gradient(135deg, var(--gold), var(--gold-deep)); box-shadow: 0 12px 30px color-mix(in srgb, var(--gold) 40%, transparent); transition: transform .15s; }
+        .punch svg { width: 28px; height: 28px; }
+        .punch::after { content: ''; position: absolute; inset: 0; border-radius: inherit; border: 2px solid var(--gold); animation: halo 2.2s ease-out infinite; }
+        @keyframes halo { from { opacity: .8; transform: scale(1); } to { opacity: 0; transform: scale(1.08, 1.35); } }
+        .punch:active { transform: scale(.97); }
+        .stamp-done { width: 100%; margin-top: 12px; padding: 13px; border-radius: 18px; cursor: pointer; font-family: 'Cairo'; font-weight: 800; font-size: 1rem;
+            color: var(--ph); background: color-mix(in srgb, var(--ph) 12%, transparent); border: 1.5px solid var(--ph); }
+        .link-btn { background: none; border: none; color: var(--muted); font-family: 'Tajawal'; font-weight: 700; font-size: .85rem; cursor: pointer; margin-top: 10px; padding: 6px 10px; }
+        .hero.punched .ring-wrap { animation: pop .7s cubic-bezier(.2,1.6,.4,1); }
+        @keyframes pop { 40% { transform: scale(1.06); } }
+
+        /* ===== مواقيت الصلاة ===== */
+        .section-title { font-family: 'Cairo'; font-weight: 800; font-size: .92rem; color: var(--gold); margin: 0 0 12px; display: flex; align-items: center; gap: 8px; }
+        .section-title::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--border), transparent); }
+        .prayer-box { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+        .prayer-item { text-align: center; padding: 9px 2px; border-radius: 14px; background: var(--input-bg); border: 1px solid transparent; transition: .4s; }
+        .prayer-item.next { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 14%, transparent); }
+        .prayer-name { font-size: .72rem; font-weight: 700; color: var(--muted); margin-bottom: 3px; }
+        .prayer-item.next .prayer-name { color: var(--gold); }
+        .prayer-time { font-family: 'Cairo'; font-size: .85rem; font-weight: 800; }
+
+        /* ===== المدخلات والنتائج ===== */
+        .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        label { display: block; font-weight: 700; margin-bottom: 6px; font-size: .85rem; color: var(--muted); }
+        select, input { width: 100%; padding: 13px 12px; border: 1.5px solid var(--border); border-radius: 14px; font-size: 1rem; font-family: 'Tajawal'; font-weight: 700; background: var(--input-bg); color: var(--text); outline: none; transition: .25s; color-scheme: dark; }
+        body[data-theme="light"] select, body[data-theme="light"] input { color-scheme: light; }
+        select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23e9c46a' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 14px center; padding-left: 34px; }
+        select option { background: var(--card-solid); color: var(--text); }
+        select:focus, input:focus { border-color: var(--gold); box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold) 18%, transparent); }
+
+        .results-header { display: flex; justify-content: space-between; align-items: center; margin: 6px 0 10px; }
+        .copy-btn { background: var(--input-bg); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; padding: 6px 12px; font-size: .8rem; font-weight: 700; font-family: 'Tajawal'; color: var(--text); display: none; }
+        .results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .res-box { padding: 16px 10px; border-radius: 20px; text-align: center; position: relative; overflow: hidden; border: 1px solid var(--border); background: var(--input-bg); }
+        .res-box small { font-weight: 700; color: var(--muted); font-size: .82rem; }
+        .res-box::before { content: ''; position: absolute; top: 0; right: 20%; left: 20%; height: 3px; border-radius: 0 0 4px 4px; }
+        .out-bg::before { background: var(--primary); } .stamp-bg::before { background: var(--danger); }
+        .res-val { direction: ltr; unicode-bidi: isolate; font-family: 'Cairo'; font-size: 1.35rem; font-weight: 900; margin-top: 4px; }
+        .out-bg .res-val { color: var(--primary); } .stamp-bg .res-val { color: var(--danger); }
+
+        .alert-msg, .warning-msg, .deduction-msg { padding: 12px; border-radius: 14px; margin-bottom: 12px; text-align: center; font-weight: 700; display: none; line-height: 1.6; font-size: .92rem; }
+        .alert-msg { background: color-mix(in srgb, var(--danger) 13%, transparent); border: 1px dashed var(--danger); color: var(--danger); }
+        .warning-msg { background: color-mix(in srgb, var(--amber) 13%, transparent); border: 1px dashed var(--amber); color: var(--amber); }
+        .ded-red { background: color-mix(in srgb, var(--danger) 12%, transparent); border: 1px solid var(--danger); color: var(--danger); }
+        .ded-orange { background: color-mix(in srgb, var(--amber) 12%, transparent); border: 1px solid var(--amber); color: var(--amber); }
+
+        .status { margin-top: 12px; font-size: .92rem; font-weight: 800; padding: 12px; border-radius: 14px; text-align: center; display: none; color: #fff; }
+        .s-ok { background: linear-gradient(135deg, #10b981, #047857); }
+        .s-req { background: linear-gradient(135deg, #f43f5e, #be123c); }
+        .s-warn { background: linear-gradient(135deg, #f59e0b, #c2410c); }
+        .s-bad { background: linear-gradient(135deg, #9f1239, #4c0519); }
+
+        /* ===== التذكيرات ===== */
+        .rem-card { display: none; }
+        .rem-opt { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: .92rem; margin-bottom: 10px; cursor: pointer; color: var(--text); }
+        .rem-opt input { width: 20px; height: 20px; padding: 0; margin: 0; flex: none; accent-color: var(--gold); }
+        .rem-opt b { margin-inline-start: auto; font-family: 'Cairo'; color: var(--gold); direction: ltr; }
+        .rem-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+        .rem-btns button { border: none; border-radius: 14px; padding: 13px 8px; font-family: 'Tajawal'; font-weight: 800; font-size: .95rem; cursor: pointer; }
+        .rem-btn-notify { background: linear-gradient(135deg, var(--primary), var(--primary-deep)); color: #fff; }
+        .rem-btn-cal { background: linear-gradient(135deg, var(--gold), var(--gold-deep)); color: var(--on-gold); }
+        .rem-note { font-size: .82rem; line-height: 1.7; margin-top: 10px; color: var(--muted); }
+        .rem-next { margin-top: 10px; font-weight: 700; font-size: .9rem; color: var(--amber); display: none; }
+
+        /* ===== التوقيع ===== */
+        .signature-area { padding: 18px 0 6px; text-align: center; position: relative; }
+        .dev-label { font-size: .78rem; color: var(--muted); letter-spacing: 1px; margin-bottom: 2px; }
+        .sig-name { font-family: 'Aref Ruqaa', serif; font-size: 2rem; background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 700; display: inline-block; padding: 5px 0; }
+        .code-icon { font-family: monospace; color: var(--primary); font-size: 1.1rem; opacity: .6; vertical-align: middle; margin: 0 5px; }
+        .volunteer { font-size: .78rem; color: var(--muted); margin-top: 2px; }
+
+        /* ===== الأزرار العائمة والنوافذ ===== */
+        .fab-btn { position: fixed; bottom: max(20px, env(safe-area-inset-bottom)); left: 20px; width: 56px; height: 56px; border-radius: 18px; border: 1px solid var(--border);
+            background: linear-gradient(135deg, var(--gold), var(--gold-deep)); color: var(--on-gold); font-size: 1.6rem; font-weight: 900; font-family: 'Cairo'; cursor: pointer; z-index: 2000; box-shadow: 0 10px 28px rgba(0,0,0,.35); transition: transform .2s; }
+        .fab-btn:active { transform: scale(.92); }
+        .faq-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 3000; align-items: flex-end; justify-content: center; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+        .faq-content { background: var(--card-solid); width: 100%; max-width: 560px; max-height: 82vh; border-radius: 28px 28px 0 0; padding: 22px 20px calc(22px + env(safe-area-inset-bottom)); overflow-y: auto; border: 1px solid var(--border); animation: slideUp .35s cubic-bezier(.2,.8,.2,1); }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: none; } }
+        .faq-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .faq-header button { background: var(--input-bg); border: none; width: 36px; height: 36px; border-radius: 12px; font-size: 1rem; cursor: pointer; color: var(--text); }
+        .search-box { margin-bottom: 14px; }
+        .qa-item { background: var(--input-bg); border-radius: 14px; padding: 14px; margin-bottom: 10px; border: 1px solid var(--border); cursor: pointer; }
+        .qa-q { font-weight: 800; color: var(--gold); display: flex; justify-content: space-between; gap: 10px; }
+        .qa-a { font-size: .93rem; margin-top: 10px; line-height: 1.7; display: none; border-top: 1px solid var(--border); padding-top: 10px; }
         .qa-item.active .qa-a { display: block; }
 
-        .rem-card { margin-top: 18px; background: var(--input-bg); border: 2px solid rgba(212,175,55,.5); border-radius: 20px; padding: 16px; display: none; }
-        .rem-title { font-family: 'Cairo'; font-weight: 900; color: var(--primary); font-size: 1.05rem; margin-bottom: 10px; }
-        [data-theme="dark"] .rem-title { color: var(--gold); }
-        .rem-opt { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 0.92rem; margin-bottom: 8px; cursor: pointer; }
-        .rem-opt input { width: 20px; height: 20px; padding: 0; margin: 0; flex: none; accent-color: var(--primary); }
-        .rem-opt b { margin-inline-start: auto; font-family: 'Cairo'; color: var(--primary); direction: ltr; }
-        [data-theme="dark"] .rem-opt b { color: var(--gold); }
-        .rem-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
-        .rem-btns button { border: none; border-radius: 12px; padding: 12px 8px; font-family: 'Tajawal'; font-weight: 700; font-size: 0.95rem; cursor: pointer; color: #fff; }
-        .rem-btn-notify { background: var(--primary); }
-        .rem-btn-cal { background: #b38728; }
-        .rem-note { font-size: 0.82rem; line-height: 1.6; margin-top: 10px; opacity: 0.85; }
-        .rem-next { margin-top: 10px; font-weight: 700; font-size: 0.9rem; color: var(--perm-orange); display: none; }
-        .rem-banner { position: fixed; top: 14px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 480px; background: #8b0000; color: #fff; border: 2px solid var(--gold); border-radius: 16px; padding: 14px 16px; z-index: 4000; font-weight: 700; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,.35); display: none; }
+        .rem-banner { position: fixed; top: max(14px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); width: 92%; max-width: 480px; background: linear-gradient(135deg, #9f1239, #4c0519); color: #fff; border: 1.5px solid var(--gold); border-radius: 18px; padding: 14px 16px; z-index: 4000; font-weight: 800; text-align: center; box-shadow: 0 14px 34px rgba(0,0,0,.4); display: none; }
+        .toast { position: fixed; bottom: calc(92px + env(safe-area-inset-bottom)); left: 50%; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; z-index: 3500;
+            background: var(--card-solid); color: var(--text); border: 1px solid var(--gold); border-radius: 16px; padding: 12px 18px; font-weight: 800; box-shadow: 0 12px 30px rgba(0,0,0,.35); transition: .35s cubic-bezier(.2,.8,.2,1); max-width: 88%; text-align: center; }
+        .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+        @media (max-width: 380px) { .prayer-box { grid-template-columns: repeat(3, 1fr); } }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
     </style>
 </head>
 <body onload="init()">
+<script>
+    (function () {
+        var t = null;
+        try { t = (JSON.parse(localStorage.getItem('basma_prefs') || '{}') || {}).theme; } catch (e) {}
+        if (!t) t = (window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark';
+        document.body.setAttribute('data-theme', t);
+    })();
+</script>
 
 <div class="container">
-    <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+    <header class="topbar">
+        <img src="icons/icon-192x192.png" alt="">
+        <div class="brand">
+            <h1>نظام البصمة المتكامل</h1>
+            <div class="date-display" id="dateDisplay"></div>
+        </div>
+        <button class="icon-btn" onclick="toggleTheme()" aria-label="تغيير المظهر" id="themeBtn">🌙</button>
+    </header>
+
     <div class="marquee-wrapper">
         <div class="marquee-track" id="marqueeTrack"></div>
     </div>
-    <div class="date-display" id="dateDisplay"></div>
-    <div class="clock-wrapper">
-        <span style="color:white; font-family:'Cairo'; font-size:0.9rem;">الوقت:</span>
-        <div class="live-clock" id="clock">00:00:00</div>
-    </div>
-    <div class="prayer-title">مواقيت الصلاة حسب توقيت دولة الكويت</div>
-    <div class="prayer-box" id="prayers">
-        <div class="prayer-item"><div class="prayer-name">الفجر</div><div class="prayer-time" id="fajr">--:--</div></div>
-        <div class="prayer-item"><div class="prayer-name">الشروق</div><div class="prayer-time" id="sunrise">--:--</div></div>
-        <div class="prayer-item"><div class="prayer-name">الظهر</div><div class="prayer-time" id="dhuhr">--:--</div></div>
-        <div class="prayer-item"><div class="prayer-name">العصر</div><div class="prayer-time" id="asr">--:--</div></div>
-        <div class="prayer-item"><div class="prayer-name">المغرب</div><div class="prayer-time" id="maghrib">--:--</div></div>
-        <div class="prayer-item"><div class="prayer-name">العشاء</div><div class="prayer-time" id="isha">--:--</div></div>
-    </div>
 
-    <div class="input-row">
-        <div><label>👤 الجنس</label><select id="gender" oninput="calculate()"><option value="female">أنثى</option><option value="male">ذكر</option></select></div>
-        <div><label>🕒 وقت الحضور</label><input type="time" id="actEntry" oninput="calculate()"></div>
-    </div>
+    <!-- بطاقة اليوم -->
+    <section class="card hero" id="hero" data-phase="idle">
+        <div class="hero-head">
+            <span>يومك اليوم</span>
+            <span class="clock" id="clock">--:--:--</span>
+        </div>
+        <div class="ring-wrap">
+            <svg class="ring" viewBox="0 0 260 260" aria-hidden="true">
+                <circle class="ring-orbit" cx="130" cy="130" r="124"></circle>
+                <circle class="ring-track" cx="130" cy="130" r="96"></circle>
+                <circle class="ring-stamp" id="ringStamp" cx="130" cy="130" r="112" style="opacity:0"></circle>
+                <circle class="ring-prog" id="ringProg" cx="130" cy="130" r="96" stroke-dasharray="0 999"></circle>
+            </svg>
+            <div class="ring-center">
+                <div class="phase-chip" id="phaseChip">ابدأ يومك</div>
+                <div class="count" id="count">--:--</div>
+                <div class="count-sub" id="countSub">اضغط «بصمت الحين» أول ما تبصم</div>
+            </div>
+        </div>
+        <div class="timeline" id="timeline" style="display:none">
+            <div class="tl-item" id="tlIn"><div class="tl-dot"></div><div class="tl-label">الحضور</div><div class="tl-time" id="tlInT">--:--</div></div>
+            <div class="tl-item" id="tlStamp"><div class="tl-dot"></div><div class="tl-label">التواجد</div><div class="tl-time" id="tlStampT">--:--</div></div>
+            <div class="tl-item" id="tlOut"><div class="tl-dot"></div><div class="tl-label">الانصراف</div><div class="tl-time" id="tlOutT">--:--</div></div>
+        </div>
+        <button class="punch" id="punchBtn" onclick="punchNow()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 11.5c0 3.4-.9 6.3-2.6 8.8"/><path d="M15.3 12.6c0 2.9-.6 5.4-1.8 7.6"/><path d="M8.6 11.2a3.4 3.4 0 0 1 6.8 0"/><path d="M5.8 14.5c.4-1.3.6-2.4.6-3.4a5.6 5.6 0 0 1 11.2 0c0 1.2-.1 2.4-.3 3.6"/><path d="M3.8 9.4A8.6 8.6 0 0 1 19.9 7.6"/><path d="M6.3 4.8A8.5 8.5 0 0 1 17 4.6"/></svg>
+            بصمت الحين
+        </button>
+        <button class="stamp-done" id="stampDoneBtn" onclick="markStamp()" style="display:none">✓ بصمت التواجد</button>
+        <button class="link-btn" id="resetBtn" onclick="resetDay()" style="display:none">↺ مسح اليوم والبدء من جديد</button>
+    </section>
 
-    <div class="input-row">
-        <div><label>📝 الاستئذان</label><select id="pType" oninput="calculate()"><option value="none">بدون</option><option value="entry">دخول</option><option value="exit">خروج</option></select></div>
-        <div id="pExtra" style="display:none;"><label id="extraLabel">وقت الدوام الرسمي</label><input type="time" id="pStart" value="07:00" oninput="calculate()"><select id="pExHours" oninput="calculate()" style="display:none;"><option value="1">1 ساعة</option><option value="2">2 ساعة</option><option value="3">3 ساعات</option></select></div>
-    </div>
+    <section class="card">
+        <div class="section-title">⚙️ تفاصيل الحسبة</div>
+        <div class="input-row">
+            <div><label>👤 الجنس</label><select id="gender" oninput="calculate()"><option value="female">أنثى</option><option value="male">ذكر</option></select></div>
+            <div><label>🕒 وقت الحضور</label><input type="time" id="actEntry" oninput="calculate()"></div>
+        </div>
+        <div class="input-row">
+            <div><label>📝 الاستئذان</label><select id="pType" oninput="calculate()"><option value="none">بدون</option><option value="entry">دخول</option><option value="exit">خروج</option></select></div>
+            <div id="pExtra" style="display:none;"><label id="extraLabel">وقت الدوام الرسمي</label><input type="time" id="pStart" value="07:00" oninput="calculate()"><select id="pExHours" oninput="calculate()" style="display:none;"><option value="1">1 ساعة</option><option value="2">2 ساعة</option><option value="3">3 ساعات</option></select></div>
+        </div>
 
-    <div id="alertMsg" class="alert-msg"></div>
-    <div id="warningMsg" class="warning-msg" style="display:none;"></div>
-    <div id="deductionMsg" class="deduction-msg" style="display:none;"></div>
+        <div id="alertMsg" class="alert-msg"></div>
+        <div id="warningMsg" class="warning-msg"></div>
+        <div id="deductionMsg" class="deduction-msg"></div>
 
-    <div class="results-header">
-        <label style="margin:0">النتائج:</label>
-        <button id="copyBtn" class="copy-btn" onclick="copyResults()">📋 نسخ التقرير</button>
-    </div>
-    <div class="results-grid">
-        <div class="res-box out-bg"><small>وقت الخروج</small><div class="res-val" id="outVal">--:--</div></div>
-        <div class="res-box stamp-bg"><small>بصمة التواجد</small><div class="res-val" id="stampVal">--:--</div></div>
-    </div>
+        <div class="results-header">
+            <label style="margin:0">النتائج</label>
+            <button id="copyBtn" class="copy-btn" onclick="copyResults()">📋 نسخ التقرير</button>
+        </div>
+        <div class="results-grid">
+            <div class="res-box out-bg"><small>وقت الخروج</small><div class="res-val" id="outVal">--:--</div></div>
+            <div class="res-box stamp-bg"><small>بصمة التواجد</small><div class="res-val" id="stampVal">--:--</div></div>
+        </div>
+        <div id="statusLabel" class="status"></div>
+    </section>
 
-    <div id="statusLabel" style="margin-top:15px; font-size:0.9rem; font-weight:700; padding:10px; border-radius:12px; text-align:center; display:none;"></div>
-
-    <div id="remCard" class="rem-card">
-        <div class="rem-title">🔔 التذكيرات</div>
+    <section id="remCard" class="card rem-card">
+        <div class="section-title">🔔 التذكيرات</div>
         <label class="rem-opt" id="remStartRow"><input type="checkbox" id="remStart" checked> بداية بصمة التواجد <b id="remStartT">--:--</b></label>
         <label class="rem-opt" id="remEndRow"><input type="checkbox" id="remEnd" checked> قبل نهاية بصمة التواجد بـ 10 دقائق <b id="remEndT">--:--</b></label>
         <label class="rem-opt"><input type="checkbox" id="remOut" checked> وقت الانصراف <b id="remOutT">--:--</b></label>
@@ -159,24 +294,38 @@
         </div>
         <div class="rem-next" id="remNext"></div>
         <div class="rem-note" id="remNote">«تفعيل التنبيه» يشتغل والتطبيق مفتوح أو بالخلفية. للتذكير المضمون حتى لو قفلت التطبيق اختر «إضافة للتقويم».</div>
-    </div>
+    </section>
+
+    <section class="card">
+        <div class="section-title">🕌 مواقيت الصلاة · دولة الكويت</div>
+        <div class="prayer-box" id="prayers">
+            <div class="prayer-item" data-p="fajr"><div class="prayer-name">الفجر</div><div class="prayer-time" id="fajr">--:--</div></div>
+            <div class="prayer-item" data-p="sunrise"><div class="prayer-name">الشروق</div><div class="prayer-time" id="sunrise">--:--</div></div>
+            <div class="prayer-item" data-p="dhuhr"><div class="prayer-name">الظهر</div><div class="prayer-time" id="dhuhr">--:--</div></div>
+            <div class="prayer-item" data-p="asr"><div class="prayer-name">العصر</div><div class="prayer-time" id="asr">--:--</div></div>
+            <div class="prayer-item" data-p="maghrib"><div class="prayer-name">المغرب</div><div class="prayer-time" id="maghrib">--:--</div></div>
+            <div class="prayer-item" data-p="isha"><div class="prayer-name">العشاء</div><div class="prayer-time" id="isha">--:--</div></div>
+        </div>
+    </section>
 
     <div class="signature-area">
         <div class="dev-label">تطوير وبرمجة</div>
         <span class="code-icon">&lt;/&gt;</span>
         <span class="sig-name">بدر فلاح المطيري</span>
         <span class="code-icon">&lt;/&gt;</span>
+        <div class="volunteer">عمل تطوعي لخدمتكم في حساب الوقت</div>
     </div>
 </div>
 
-<button class="fab-btn" onclick="toggleFaq()">?</button>
+<button class="fab-btn" onclick="toggleFaq()" aria-label="المساعد">?</button>
 <div class="rem-banner" id="remBanner" onclick="this.style.display='none'"></div>
+<div class="toast" id="toast"></div>
 
 <div class="faq-modal" id="faqModal">
     <div class="faq-content">
         <div class="faq-header">
-            <div style="font-family:'Cairo'; font-weight:900; color:var(--primary); font-size:1.3rem;">🤖 المساعد الذكي</div>
-            <button onclick="toggleFaq()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">✕</button>
+            <div style="font-family:'Cairo'; font-weight:900; color:var(--gold); font-size:1.2rem;">🤖 المساعد الذكي</div>
+            <button onclick="toggleFaq()">✕</button>
         </div>
         <input type="text" class="search-box" id="faqSearch" placeholder="ابحث في القوانين..." onkeyup="filterFaq()">
         <div id="faqList"></div>
@@ -187,174 +336,384 @@
     if ('serviceWorker' in navigator) { window.addEventListener('load', function() { navigator.serviceWorker.register('sw.js'); }); }
 
     const azkarList = [
-        "اللَّهُمَّ بَارِكْ لِي فِي وَقْتِي", "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ", "سُبْحَانَ اللَّهِ الْعَظِيمِ", 
-        "لَا إِلَهَ إِلَّا أَنْتَ سُبْحَانَكَ إِنِّي كُنْتُ مِنَ الظَّالِمِينَ", "اللَّهُمَّ صَلِّ وَسَلِّمْ عَلَى نَبِيِّنَا مُحَمَّدٍ", 
-        "رَبِّ اشْرَحْ لِي صَدْرِي وَيَسِّرْ لِي أَمْرِي", "أَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ"
+        "اللَّهُمَّ بَارِكْ لِي فِي وَقْتِي", "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ", "سُبْحَانَ اللَّهِ الْعَظِيمِ",
+        "لَا إِلَهَ إِلَّا أَنْتَ سُبْحَانَكَ إِنِّي كُنْتُ مِنَ الظَّالِمِينَ", "اللَّهُمَّ صَلِّ وَسَلِّمْ عَلَى نَبِيِّنَا مُحَمَّدٍ",
+        "رَبِّ اشْرَحْ لِي صَدْرِي وَيَسِّرْ لِي أَمْرِي", "أَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ"
     ];
 
     const faqData = [
         { q: "كيف يحسب وقت الخروج مع إذن الدخول؟", a: "يُحسب بناءً على **وقت الدوام الرسمي** الذي تختاره (مثلاً 7:00) + ساعات العمل الرسمية. التأخير يُخصم من رصيد الاستئذان، ولا يؤخر وقت انصرافك." },
         { q: "دخلت متأخراً (بدون إذن) والنظام مغلق؟", a: "إذا تجاوزت 12:01 م (وقت إغلاق النظام) ولم يكن لديك إذن، يُعتبر انقطاعاً عن العمل وتظهر لك رسالة تحذيرية حمراء." },
         { q: "رصيد الـ 105 دقائق", a: "هو رصيد للتأخيرات البسيطة (بدون إذن). إذا تجاوزت 9:30 يبدأ الخصم منه، وإذا نفد يخصم من الراتب." },
-        { q: "هل إذن الدخول يعفي من البصمة الثالثة؟", a: "ليس بالضرورة. تعفى فقط إذا كان وقت خروجك الرسمي يسبق موعد بصمة التواجد." }
+        { q: "هل إذن الدخول يعفي من البصمة الثالثة؟", a: "ليس بالضرورة. تعفى فقط إذا كان وقت خروجك الرسمي يسبق موعد بصمة التواجد." },
+        { q: "شنو زر «بصمت الحين»؟", a: "اضغطه أول ما تبصم بجهاز البصمة: ياخذ الوقت تلقائياً ويحسب انصرافك وبصمة التواجد ويبدأ العدّاد. بياناتك تنحفظ بجهازك لين نهاية اليوم." }
     ];
 
-    function toggleTheme() { document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
+    // ===== التخزين والتفضيلات =====
+    const DAY_KEY = 'basma_day', PREF_KEY = 'basma_prefs';
+    let dayState = { stampDone: false };
+    function loadJSON(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
+    function saveJSON(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+    function dropKey(k) { try { localStorage.removeItem(k); } catch (e) {} }
+    const $ = id => document.getElementById(id);
+    const pad = n => String(n).padStart(2, '0');
 
+    function savePrefs() { saveJSON(PREF_KEY, { gender: $('gender').value, theme: document.body.getAttribute('data-theme') }); }
+    function saveDay() {
+        const entry = $('actEntry').value;
+        if (!entry) { dropKey(DAY_KEY); return; }
+        saveJSON(DAY_KEY, { day: todayKey(), entry: entry, pType: $('pType').value, pStart: $('pStart').value, pExHours: $('pExHours').value, stampDone: dayState.stampDone });
+    }
+
+    function applyThemeUI() {
+        const dark = document.body.getAttribute('data-theme') !== 'light';
+        $('themeBtn').textContent = dark ? '☀️' : '🌙';
+        document.querySelector('meta[name="theme-color"]').setAttribute('content', dark ? '#06140f' : '#f4eee1');
+    }
+    function toggleTheme() {
+        document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+        applyThemeUI(); savePrefs();
+    }
+
+    let toastTimer;
+    function toast(msg) {
+        const t = $('toast'); t.textContent = msg; t.classList.add('show');
+        clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    let prayerTimes = null;
     async function init() {
-        const track = document.getElementById('marqueeTrack');
+        applyThemeUI();
+        const track = $('marqueeTrack');
         const contentBlock = azkarList.map(z => `<span class="marquee-item">۞ ${z}</span>`).join('');
         track.innerHTML = `<div class="marquee-content">${contentBlock}</div><div class="marquee-content">${contentBlock}</div>`;
 
         const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        document.getElementById('dateDisplay').innerText = new Date().toLocaleDateString('ar-KW', dateOptions);
-        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-GB'); }, 1000);
+        $('dateDisplay').innerText = new Date().toLocaleDateString('ar-KW', dateOptions);
         renderFaq();
+
+        const prefs = loadJSON(PREF_KEY);
+        if (prefs && prefs.gender) $('gender').value = prefs.gender;
+        const saved = loadJSON(DAY_KEY);
+        if (saved && saved.day === todayKey() && saved.entry) {
+            $('actEntry').value = saved.entry;
+            $('pType').value = saved.pType || 'none';
+            if (saved.pStart) $('pStart').value = saved.pStart;
+            if (saved.pExHours) $('pExHours').value = saved.pExHours;
+            dayState.stampDone = !!saved.stampDone;
+            calculate();
+        } else { dropKey(DAY_KEY); }
+
+        tick(); setInterval(tick, 1000);
         try {
             const r = await fetch('https://api.aladhan.com/v1/timingsByCity?city=Kuwait%20City&country=Kuwait&method=10');
             const d = await r.json();
             const t = d.data.timings;
-            ['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'].forEach(p => { 
-                if(document.getElementById(p.toLowerCase())) document.getElementById(p.toLowerCase()).innerText = t[p]; 
+            prayerTimes = {};
+            ['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'].forEach(p => {
+                const el = $(p.toLowerCase());
+                if (el) el.innerText = t[p];
+                prayerTimes[p.toLowerCase()] = t[p];
             });
+            markNextPrayer();
         } catch(e) {}
     }
 
+    function tick() {
+        const d = new Date();
+        let h = d.getHours();
+        const suffix = h < 12 ? 'ص' : 'م';
+        h = h % 12 || 12;
+        $('clock').innerHTML = `${pad(h)}:${pad(d.getMinutes())}:${pad(d.getSeconds())}<small>${suffix}</small>`;
+        renderHero();
+        if (d.getSeconds() === 0) markNextPrayer();
+    }
+
+    function markNextPrayer() {
+        if (!prayerTimes) return;
+        const n = nowMins();
+        let next = null, best = Infinity;
+        for (const [k, v] of Object.entries(prayerTimes)) {
+            const [ph, pm] = String(v).split(':').map(Number);
+            const m = ph * 60 + pm;
+            if (m > n && m < best) { best = m; next = k; }
+        }
+        if (!next) next = 'fajr';
+        document.querySelectorAll('.prayer-item').forEach(el => el.classList.toggle('next', el.dataset.p === next));
+    }
+
+    // ===== الحسبة =====
     function calculate() {
-        const entry = document.getElementById('actEntry').value;
-        const type = document.getElementById('pType').value;
-        const gen = document.getElementById('gender').value;
-        const alert = document.getElementById('alertMsg');
-        const warning = document.getElementById('warningMsg');
-        const dedMsg = document.getElementById('deductionMsg');
-        const copyBtn = document.getElementById('copyBtn');
-        
-        if(!entry) { copyBtn.style.display = 'none'; return; }
+        calcCore();
+        savePrefs(); saveDay();
+        renderHero();
+    }
+
+    function calcCore() {
+        const entry = $('actEntry').value;
+        const type = $('pType').value;
+        const gen = $('gender').value;
+        const alert = $('alertMsg');
+        const warning = $('warningMsg');
+        const dedMsg = $('deductionMsg');
+        const copyBtn = $('copyBtn');
+
+        alert.style.display = 'none'; warning.style.display = 'none'; dedMsg.style.display = 'none';
+        plan = null; updateReminderUI();
+
+        if(!entry) {
+            copyBtn.style.display = 'none'; $('statusLabel').style.display = 'none';
+            $('outVal').innerText = '--:--'; $('stampVal').innerText = '--:--';
+            return;
+        }
 
         const [h, m] = entry.split(':').map(Number);
         const mins = h * 60 + m;
-        
-        alert.style.display = 'none'; warning.style.display = 'none'; dedMsg.style.display = 'none';
-        plan = null; updateReminderUI();
 
         if (mins < 390) { alert.innerText = "⚠️ البصمة لا تعمل قبل 6:30 ص"; alert.style.display = 'block'; return; }
         if (mins > 720) { alert.innerText = "⚠️ الحد الأقصى للحضور 12:00 م"; alert.style.display = 'block'; return; }
 
         let outM;
-        const shiftDuration = (gen === 'male') ? 390 : 375; 
+        const shiftDuration = (gen === 'male') ? 390 : 375;
 
         if (type === 'none') {
-            document.getElementById('pExtra').style.display = 'none';
+            $('pExtra').style.display = 'none';
             if (mins >= 545 && mins <= 570) {
                 warning.innerText = "✅ فترة السماح (تحسب 9:30)"; warning.style.display = 'block';
             } else if (mins > 570) {
                 const lateMins = mins - 570;
-                dedMsg.style.borderColor = '#ff0000'; dedMsg.style.color = '#c0392b'; dedMsg.style.background = '#ffebeb';
+                dedMsg.className = 'deduction-msg ded-red';
                 dedMsg.innerHTML = `❌ تأخير <b>${lateMins} دقيقة</b>.<br>سيتم خصمها من رصيد التأخير (الـ 105).`;
                 dedMsg.style.display = 'block';
             }
             let effectiveEntry = mins;
             if (mins >= 545 && mins <= 570) effectiveEntry = 570;
             else if (mins >= 390 && mins <= 420) effectiveEntry = 420;
-            const baseExit = (gen === 'male') ? 810 : 795; 
+            const baseExit = (gen === 'male') ? 810 : 795;
             if (effectiveEntry <= 420) outM = baseExit;
             else outM = baseExit + (effectiveEntry - 420);
         } else if (type === 'entry') {
-            document.getElementById('pExtra').style.display = 'block';
-            document.getElementById('extraLabel').innerText = "وقت الدوام الرسمي";
-            document.getElementById('pStart').style.display = 'block';
-            document.getElementById('pExHours').style.display = 'none';
-            const [sh, sm] = document.getElementById('pStart').value.split(':').map(Number);
-            const startMins = sh * 60 + sm; 
+            $('pExtra').style.display = 'block';
+            $('extraLabel').innerText = "وقت الدوام الرسمي";
+            $('pStart').style.display = 'block';
+            $('pExHours').style.display = 'none';
+            const [sh, sm] = $('pStart').value.split(':').map(Number);
+            const startMins = sh * 60 + sm;
             if (mins > startMins) {
                 const usedMins = mins - startMins;
                 const uH = Math.floor(usedMins / 60);
                 const uM = usedMins % 60;
-                dedMsg.style.borderColor = '#e67e22'; dedMsg.style.color = '#d35400'; dedMsg.style.background = '#fdf2e9';
+                dedMsg.className = 'deduction-msg ded-orange';
                 dedMsg.innerHTML = `📝 تم خصم <b>${uH} ساعة و ${uM} دقيقة</b><br>من رصيد الاستئذان الشهري.`;
                 dedMsg.style.display = 'block';
             }
             outM = startMins + shiftDuration;
         } else if (type === 'exit') {
-            document.getElementById('pExtra').style.display = 'block';
-            document.getElementById('extraLabel').innerText = "عدد الساعات";
-            document.getElementById('pStart').style.display = 'none';
-            document.getElementById('pExHours').style.display = 'block';
+            $('pExtra').style.display = 'block';
+            $('extraLabel').innerText = "عدد الساعات";
+            $('pStart').style.display = 'none';
+            $('pExHours').style.display = 'block';
             let effectiveEntry = mins;
             if (mins >= 545 && mins <= 570) effectiveEntry = 570;
             else if (mins >= 390 && mins <= 420) effectiveEntry = 420;
             const baseExit = (gen === 'male') ? 810 : 795;
             if (effectiveEntry <= 420) outM = baseExit;
             else outM = baseExit + (effectiveEntry - 420);
-            outM -= (parseInt(document.getElementById('pExHours').value) * 60);
-            const exH = document.getElementById('pExHours').value;
-            dedMsg.style.borderColor = '#e67e22'; dedMsg.style.color = '#d35400'; dedMsg.style.background = '#fdf2e9';
+            outM -= (parseInt($('pExHours').value) * 60);
+            const exH = $('pExHours').value;
+            dedMsg.className = 'deduction-msg ded-orange';
             dedMsg.innerHTML = `📝 تم خصم <b>${exH} ساعات</b><br>من رصيد الاستئذان الشهري.`;
             dedMsg.style.display = 'block';
         }
 
-        if (outM > 1020) outM = 1020; 
-        document.getElementById('outVal').innerText = fmt(outM);
-        
+        if (outM > 1020) outM = 1020;
+        $('outVal').innerText = fmt(outM);
+
         let sStart;
-        if (mins >= 390 && mins <= 420) sStart = 541; 
-        else if (mins >= 545 && mins <= 570) sStart = 661; 
+        if (mins >= 390 && mins <= 420) sStart = 541;
+        else if (mins >= 545 && mins <= 570) sStart = 661;
         else sStart = mins + 121;
-        
-        const stampVal = document.getElementById('stampVal');
-        const status = document.getElementById('statusLabel');
+
+        const stampVal = $('stampVal');
+        const status = $('statusLabel');
         status.style.display = 'block';
-        const cutoffPresence = 721; 
+        const cutoffPresence = 721;
 
         if (outM <= sStart) {
             stampVal.innerText = "غير مطالب";
             status.innerText = "✅ معفى: خروجك قبل موعد البصمة";
-            status.style.background = "#27ae60"; status.style.color = "white";
+            status.className = 'status s-ok';
         } else if (sStart >= cutoffPresence) {
             stampVal.innerText = "⚠️ النظام مغلق";
             if (type === 'none') {
-                 status.innerText = "❌ تعذر إثبات التواجد (انقطاع عن العمل)";
-                 status.style.background = "#8b0000"; status.style.color = "white";
+                status.innerText = "❌ تعذر إثبات التواجد (انقطاع عن العمل)";
+                status.className = 'status s-bad';
             } else if (type === 'entry') {
-                 status.innerText = "⚠️ النظام مغلق (لديك إذن دخول)";
-                 status.style.background = "#e67e22"; status.style.color = "white";
+                status.innerText = "⚠️ النظام مغلق (لديك إذن دخول)";
+                status.className = 'status s-warn';
             } else {
-                 status.innerText = "⚠️ النظام مغلق (لديك إذن خروج)";
-                 status.style.background = "#e67e22"; status.style.color = "white";
+                status.innerText = "⚠️ النظام مغلق (لديك إذن خروج)";
+                status.className = 'status s-warn';
             }
         } else {
             const stampEnd = Math.min(sStart + 60, 1440);
             stampVal.innerText = fmt(sStart) + " - " + fmt(stampEnd);
             status.innerText = "⚠️ مطالب ببصمة التواجد";
-            status.style.background = "#e74c3c"; status.style.color = "white";
+            status.className = 'status s-req';
         }
-        
-        copyBtn.style.display = 'block'; 
+
+        copyBtn.style.display = 'block';
 
         const stampRequired = !(outM <= sStart) && !(sStart >= cutoffPresence);
-        plan = { out: outM, sStart: sStart, sEnd: Math.min(sStart + 60, 1440), required: stampRequired };
+        plan = { entry: mins, out: outM, sStart: sStart, sEnd: Math.min(sStart + 60, 1440), required: stampRequired,
+                 closed: (sStart >= cutoffPresence && outM > sStart), cut: type === 'none' };
         updateReminderUI();
     }
 
-    function copyResults() {
-        const out = document.getElementById('outVal').innerText;
-        const stamp = document.getElementById('stampVal').innerText;
-        const txt = `📅 نظام البصمة\n🕒 خروج: ${out}\n📍 تواجد: ${stamp}`;
-        navigator.clipboard.writeText(txt).then(() => alert("تم نسخ التقرير!"));
+    // ===== بطاقة اليوم =====
+    const R_PROG = 2 * Math.PI * 96, R_STAMP = 2 * Math.PI * 112;
+    function cd(mins) {
+        const s = Math.max(0, Math.ceil(mins * 60));
+        const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+        return (h ? h + ':' + pad(m) : m) + ':' + pad(sec);
     }
 
-    function toggleFaq() { document.getElementById('faqModal').style.display = (document.getElementById('faqModal').style.display === 'flex') ? 'none' : 'flex'; }
+    function renderHero() {
+        const hero = $('hero');
+        const entryVal = $('actEntry').value;
+        const chip = $('phaseChip'), count = $('count'), sub = $('countSub');
+        const prog = $('ringProg'), stamp = $('ringStamp');
+        count.classList.remove('word');
+        $('resetBtn').style.display = entryVal ? 'inline-block' : 'none';
+
+        if (!plan) {
+            hero.dataset.phase = 'idle';
+            prog.setAttribute('stroke-dasharray', '0 ' + R_PROG); prog.style.opacity = 0;
+            stamp.style.opacity = 0;
+            $('timeline').style.display = 'none';
+            $('punchBtn').style.display = 'inline-flex';
+            $('stampDoneBtn').style.display = 'none';
+            const d = new Date();
+            if (entryVal && $('alertMsg').style.display === 'block') {
+                chip.textContent = '⚠️ تنبيه'; count.textContent = entryVal; sub.textContent = $('alertMsg').innerText.replace('⚠️', '').trim();
+            } else {
+                chip.textContent = '👋 ابدأ يومك'; count.textContent = pad(d.getHours() % 12 || 12) + ':' + pad(d.getMinutes());
+                sub.textContent = 'اضغط «بصمت الحين» أول ما تبصم بالجهاز';
+            }
+            return;
+        }
+
+        const n = nowMins(), p = plan;
+        const total = Math.max(p.out - p.entry, 1);
+        const frac = Math.min(Math.max((n - p.entry) / total, 0), 1);
+        prog.setAttribute('stroke-dasharray', (frac * R_PROG).toFixed(1) + ' ' + R_PROG.toFixed(1));
+        prog.style.opacity = frac > 0 ? 1 : 0;
+
+        if (p.required) {
+            const a = Math.min(Math.max((p.sStart - p.entry) / total, 0), 1);
+            const b = Math.max(Math.min((p.sEnd - p.sStart) / total, 1 - a), 0);
+            stamp.setAttribute('stroke-dasharray', (b * R_STAMP).toFixed(1) + ' ' + R_STAMP.toFixed(1));
+            stamp.setAttribute('stroke-dashoffset', (-a * R_STAMP).toFixed(1));
+            stamp.style.opacity = dayState.stampDone ? .35 : .9;
+        } else stamp.style.opacity = 0;
+
+        $('timeline').style.display = 'grid';
+        $('punchBtn').style.display = 'none';
+        $('tlInT').textContent = fmt(p.entry);
+        $('tlStampT').textContent = p.required ? fmt(p.sStart) + '–' + fmt(p.sEnd) : (p.closed ? 'مغلق' : 'غير مطالب');
+        $('tlOutT').textContent = fmt(p.out);
+
+        let phase, chipT, countT, subT, word = false, tl = { in: 'done', st: '', out: '' };
+        const inStamp = p.required && n >= p.sStart && n < p.sEnd && !dayState.stampDone;
+
+        if (n < p.entry) {
+            phase = 'plan'; chipT = '📅 حسبة مسبقة'; countT = fmt(p.out); subT = 'وقت انصرافك المتوقع';
+            tl = { in: 'now', st: '', out: '' };
+        } else if (p.required && n < p.sStart) {
+            phase = 'work'; chipT = '🟢 دوامك ماشي'; countT = cd(p.sStart - n); subT = 'باقي على بداية بصمة التواجد';
+            tl.st = 'now';
+        } else if (inStamp) {
+            const urgent = p.sEnd - n <= 10;
+            phase = urgent ? 'urgent' : 'stamp';
+            chipT = urgent ? '🔴 آخر دقايق للتواجد!' : '🟡 ابصم التواجد الحين';
+            countT = cd(p.sEnd - n); subT = 'ابصم قبل ' + fmt(p.sEnd);
+            tl.st = 'now';
+        } else if (n < p.out) {
+            phase = p.closed ? 'closed' : 'work';
+            chipT = dayState.stampDone ? '✅ تم إثبات التواجد' : (p.closed ? (p.cut ? '⚠️ النظام مغلق' : '⚠️ النظام مغلق (لديك إذن)') : '🟢 دوامك ماشي');
+            countT = cd(p.out - n); subT = 'باقي على الانصراف';
+            tl.st = p.required ? 'done' : 'off'; tl.out = 'now';
+        } else {
+            phase = 'done'; chipT = '🔵 تقدر تنصرف'; countT = 'يعطيك العافية'; word = true;
+            subT = 'انتهى دوامك الساعة ' + fmt(p.out);
+            tl = { in: 'done', st: p.required ? 'done' : 'off', out: 'done' };
+        }
+        if (!p.required && tl.st !== 'now') tl.st = 'off';
+
+        hero.dataset.phase = phase;
+        chip.textContent = chipT; count.textContent = countT; sub.textContent = subT;
+        if (word) count.classList.add('word');
+        $('tlIn').className = 'tl-item ' + tl.in; $('tlStamp').className = 'tl-item ' + tl.st; $('tlOut').className = 'tl-item ' + tl.out;
+        $('stampDoneBtn').style.display = inStamp ? 'block' : 'none';
+    }
+
+    function punchNow() {
+        const d = new Date();
+        $('actEntry').value = pad(d.getHours()) + ':' + pad(d.getMinutes());
+        dayState.stampDone = false;
+        calculate();
+        if (navigator.vibrate) navigator.vibrate(60);
+        if (!plan) { toast($('alertMsg').innerText || 'تأكد من الوقت'); return; }
+        const hero = $('hero');
+        hero.classList.remove('punched'); void hero.offsetWidth; hero.classList.add('punched');
+        toast('تم ✓ انصرافك الساعة ' + fmt(plan.out));
+        if ('Notification' in window && Notification.permission === 'granted') enableReminders();
+    }
+
+    function markStamp() {
+        dayState.stampDone = true;
+        saveDay();
+        const s = loadJSON(REM_KEY);
+        if (s && s.day === todayKey()) {
+            const items = (s.items || []).filter(r => r.id === 'out');
+            saveJSON(REM_KEY, { day: s.day, items: items });
+            if ('Notification' in window && Notification.permission === 'granted') scheduleReminders(items);
+            else tickNext();
+        }
+        if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
+        toast('تم تسجيل بصمة التواجد ✓');
+        renderHero();
+    }
+
+    function resetDay() {
+        $('actEntry').value = '';
+        dayState.stampDone = false;
+        dropKey(DAY_KEY); dropKey(REM_KEY);
+        remTimers.forEach(clearTimeout); remTimers = [];
+        calculate();
+        tickNext();
+        toast('تم مسح بيانات اليوم');
+    }
+
+    function copyResults() {
+        const out = $('outVal').innerText;
+        const stamp = $('stampVal').innerText;
+        const txt = `📅 نظام البصمة\n🕒 خروج: ${out}\n📍 تواجد: ${stamp}`;
+        navigator.clipboard.writeText(txt).then(() => toast('تم نسخ التقرير ✓')).catch(() => toast('ما قدرت أنسخ'));
+    }
+
+    function toggleFaq() { $('faqModal').style.display = ($('faqModal').style.display === 'flex') ? 'none' : 'flex'; }
     function renderFaq(list = faqData) {
-        document.getElementById('faqList').innerHTML = list.map(item => `
+        $('faqList').innerHTML = list.map(item => `
             <div class="qa-item" onclick="this.classList.toggle('active')">
-                <div class="qa-q">${item.q} <span>▼</span></div><div class="qa-a">${item.a}</div>
+                <div class="qa-q">${item.q} <span>▾</span></div><div class="qa-a">${item.a}</div>
             </div>`).join('');
     }
     function filterFaq() {
-        const q = document.getElementById('faqSearch').value.toLowerCase();
+        const q = $('faqSearch').value.toLowerCase();
         renderFaq(faqData.filter(i => i.q.includes(q) || i.a.includes(q)));
     }
-    window.onclick = function(e) { if (e.target == document.getElementById('faqModal')) toggleFaq(); }
+    window.onclick = function(e) { if (e.target == $('faqModal')) toggleFaq(); }
 
     // ===== التذكيرات =====
     let plan = null;
@@ -366,29 +725,29 @@
     function atToday(m) { const d = new Date(); d.setHours(Math.floor(m / 60), m % 60, 0, 0); return d; }
 
     function updateReminderUI() {
-        const card = document.getElementById('remCard');
-        if (!plan) { card.style.display = 'none'; return; }
+        const card = $('remCard');
+        if (!plan) { card.style.display = savedReminders().length ? 'block' : 'none'; return; }
         card.style.display = 'block';
-        document.getElementById('remStartRow').style.display = plan.required ? 'flex' : 'none';
-        document.getElementById('remEndRow').style.display = plan.required ? 'flex' : 'none';
-        document.getElementById('remStartT').innerText = fmt(plan.sStart);
-        document.getElementById('remEndT').innerText = fmt(plan.sEnd - 10);
-        document.getElementById('remOutT').innerText = fmt(plan.out);
+        $('remStartRow').style.display = plan.required ? 'flex' : 'none';
+        $('remEndRow').style.display = plan.required ? 'flex' : 'none';
+        $('remStartT').innerText = fmt(plan.sStart);
+        $('remEndT').innerText = fmt(plan.sEnd - 10);
+        $('remOutT').innerText = fmt(plan.out);
     }
 
     function buildReminders() {
         if (!plan) return [];
         const list = [];
-        if (plan.required && document.getElementById('remStart').checked)
+        if (plan.required && !dayState.stampDone && $('remStart').checked)
             list.push({ id: 'start', at: plan.sStart, title: 'بصمة التواجد', body: 'بدأت فترة بصمة التواجد: ' + fmt(plan.sStart) + ' - ' + fmt(plan.sEnd) });
-        if (plan.required && document.getElementById('remEnd').checked)
+        if (plan.required && !dayState.stampDone && $('remEnd').checked)
             list.push({ id: 'end', at: plan.sEnd - 10, title: 'تنبيه: بصمة التواجد', body: 'باقي 10 دقائق على نهاية فترة بصمة التواجد (' + fmt(plan.sEnd) + ')' });
-        if (document.getElementById('remOut').checked)
+        if ($('remOut').checked)
             list.push({ id: 'out', at: plan.out, title: 'وقت الانصراف', body: 'حان وقت انصرافك: ' + fmt(plan.out) });
         return list;
     }
 
-    function setRemNote(t) { document.getElementById('remNote').innerText = t; }
+    function setRemNote(t) { $('remNote').innerText = t; }
 
     async function enableReminders() {
         const items = buildReminders().filter(r => r.at > nowMins());
@@ -404,7 +763,7 @@
         let perm = Notification.permission;
         if (perm === 'default') perm = await Notification.requestPermission();
         if (perm !== 'granted') { setRemNote('التنبيهات مقفلة لهالتطبيق. فعّلها من إعدادات الجوال، أو استخدم «إضافة للتقويم».'); return; }
-        try { localStorage.setItem(REM_KEY, JSON.stringify({ day: todayKey(), items: items })); } catch (e) {}
+        saveJSON(REM_KEY, { day: todayKey(), items: items });
         scheduleReminders(items);
         setRemNote('تم تفعيل ' + (items.length === 1 ? 'تنبيه واحد' : items.length + ' تنبيهات') + ' لليوم. خل التطبيق مفتوح أو بالخلفية، وللتذكير المضمون أضفها للتقويم بعد.');
     }
@@ -419,7 +778,7 @@
     }
 
     function fireReminder(r) {
-        const b = document.getElementById('remBanner');
+        const b = $('remBanner');
         b.innerText = '🔔 ' + r.title + ' — ' + r.body; b.style.display = 'block';
         if (navigator.vibrate) navigator.vibrate([300, 150, 300]);
         const opts = { body: r.body, icon: 'icons/icon-192x192.png', badge: 'icons/icon-192x192.png', tag: 'basma-' + r.id, renotify: true, requireInteraction: true, vibrate: [300, 150, 300] };
@@ -430,36 +789,37 @@
     }
 
     function savedReminders() {
-        try { const s = JSON.parse(localStorage.getItem(REM_KEY) || 'null'); return (s && s.day === todayKey()) ? s.items : []; } catch (e) { return []; }
+        const s = loadJSON(REM_KEY);
+        return (s && s.day === todayKey()) ? (s.items || []) : [];
     }
 
     function tickNext() {
-        const el = document.getElementById('remNext');
+        const el = $('remNext');
         const next = savedReminders().filter(r => r.at > nowMins()).sort((a, b) => a.at - b.at)[0];
         if (!next) { el.style.display = 'none'; return; }
         const left = Math.ceil(next.at - nowMins());
         const h = Math.floor(left / 60), m = left % 60;
         el.innerText = '⏰ التذكير الجاي: ' + next.title + ' الساعة ' + fmt(next.at) + ' (بعد ' + (h ? h + ' ساعة و ' : '') + m + ' دقيقة)';
         el.style.display = 'block';
-        document.getElementById('remCard').style.display = 'block';
+        $('remCard').style.display = 'block';
     }
 
-    function icsTime(d) { const p = n => String(n).padStart(2, '0'); return d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + 'T' + p(d.getHours()) + p(d.getMinutes()) + '00'; }
+    function icsTime(d) { return d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + 'T' + pad(d.getHours()) + pad(d.getMinutes()) + '00'; }
     function icsStamp() { return new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, ''); }
 
     function addToCalendar() {
         if (!plan) return;
         const ev = [];
         const uid = Date.now();
-        if (plan.required && (document.getElementById('remStart').checked || document.getElementById('remEnd').checked)) {
+        if (plan.required && !dayState.stampDone && ($('remStart').checked || $('remEnd').checked)) {
             const alarms = [];
-            if (document.getElementById('remStart').checked) alarms.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:بدأت فترة بصمة التواجد', 'TRIGGER:PT0M', 'END:VALARM');
-            if (document.getElementById('remEnd').checked) alarms.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:باقي 10 دقائق على نهاية بصمة التواجد', 'TRIGGER;RELATED=END:-PT10M', 'END:VALARM');
+            if ($('remStart').checked) alarms.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:بدأت فترة بصمة التواجد', 'TRIGGER:PT0M', 'END:VALARM');
+            if ($('remEnd').checked) alarms.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:باقي 10 دقائق على نهاية بصمة التواجد', 'TRIGGER;RELATED=END:-PT10M', 'END:VALARM');
             ev.push('BEGIN:VEVENT', 'UID:basma-stamp-' + uid + '@attendance', 'DTSTAMP:' + icsStamp(),
                 'DTSTART:' + icsTime(atToday(plan.sStart)), 'DTEND:' + icsTime(atToday(plan.sEnd)),
                 'SUMMARY:بصمة التواجد ' + fmt(plan.sStart) + ' - ' + fmt(plan.sEnd), ...alarms, 'END:VEVENT');
         }
-        if (document.getElementById('remOut').checked) {
+        if ($('remOut').checked) {
             ev.push('BEGIN:VEVENT', 'UID:basma-out-' + uid + '@attendance', 'DTSTAMP:' + icsStamp(),
                 'DTSTART:' + icsTime(atToday(plan.out)), 'DTEND:' + icsTime(atToday(plan.out + 5)),
                 'SUMMARY:وقت الانصراف ' + fmt(plan.out),
@@ -480,10 +840,11 @@
     window.addEventListener('load', () => {
         const items = savedReminders();
         if (items.length && 'Notification' in window && Notification.permission === 'granted') scheduleReminders(items);
+        else tickNext();
         setInterval(tickNext, 30000);
     });
 
-    function fmt(m) { return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`; }
+    function fmt(m) { m = Math.round(m); return `${pad(Math.floor(m/60))}:${pad(m%60)}`; }
 </script>
 </body>
 </html>

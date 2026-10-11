@@ -1,6 +1,6 @@
 // Service worker: offline cache + reminder notifications.
 // Bump CACHE_NAME on every release so phones pick up the new version.
-const CACHE_NAME = 'fingerprint-app-v2';
+const CACHE_NAME = 'fingerprint-app-v3';
 const FILES_TO_CACHE = [
   './',
   './index.html',
