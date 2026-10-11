@@ -1,11 +1,6 @@
-// Simple service worker for offline caching
-// The service worker caches the app shell (HTML, manifest and icons) so the
-// application can load even when the user has a weak or no network connection.
-// More advanced caching strategies could be implemented, but this basic
-// implementation follows best practices described in Microsoft Edge's PWA
-// documentation【920758549097399†L245-L351】.
-
-const CACHE_NAME = 'fingerprint-app-v1';
+// Service worker: offline cache + reminder notifications.
+// Bump CACHE_NAME on every release so phones pick up the new version.
+const CACHE_NAME = 'fingerprint-app-v2';
 const FILES_TO_CACHE = [
   './',
   './index.html',
@@ -15,17 +10,40 @@ const FILES_TO_CACHE = [
 ];
 
 self.addEventListener('install', (event) => {
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(FILES_TO_CACHE)));
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(FILES_TO_CACHE);
-    })
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
+  const req = event.request;
+  if (req.method !== 'GET') return;
+  // Pages: network first so updates show up, cache when offline.
+  if (req.mode === 'navigate') {
+    event.respondWith(
+      fetch(req)
+        .then((res) => { const copy = res.clone(); caches.open(CACHE_NAME).then((c) => c.put('./index.html', copy)); return res; })
+        .catch(() => caches.match('./index.html'))
+    );
+    return;
+  }
+  event.respondWith(caches.match(req).then((res) => res || fetch(req)));
+});
+
+// Tapping a reminder opens (or focuses) the app.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+      for (const c of list) { if ('focus' in c) return c.focus(); }
+      return self.clients.openWindow('./index.html');
     })
   );
 });

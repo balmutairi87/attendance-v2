@@ -84,6 +84,21 @@
         .qa-q { font-weight: 700; color: var(--primary); display: flex; justify-content: space-between; }
         .qa-a { font-size: 0.95rem; margin-top: 10px; line-height: 1.6; display: none; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 10px; }
         .qa-item.active .qa-a { display: block; }
+
+        .rem-card { margin-top: 18px; background: var(--input-bg); border: 2px solid rgba(212,175,55,.5); border-radius: 20px; padding: 16px; display: none; }
+        .rem-title { font-family: 'Cairo'; font-weight: 900; color: var(--primary); font-size: 1.05rem; margin-bottom: 10px; }
+        [data-theme="dark"] .rem-title { color: var(--gold); }
+        .rem-opt { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 0.92rem; margin-bottom: 8px; cursor: pointer; }
+        .rem-opt input { width: 20px; height: 20px; padding: 0; margin: 0; flex: none; accent-color: var(--primary); }
+        .rem-opt b { margin-inline-start: auto; font-family: 'Cairo'; color: var(--primary); direction: ltr; }
+        [data-theme="dark"] .rem-opt b { color: var(--gold); }
+        .rem-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+        .rem-btns button { border: none; border-radius: 12px; padding: 12px 8px; font-family: 'Tajawal'; font-weight: 700; font-size: 0.95rem; cursor: pointer; color: #fff; }
+        .rem-btn-notify { background: var(--primary); }
+        .rem-btn-cal { background: #b38728; }
+        .rem-note { font-size: 0.82rem; line-height: 1.6; margin-top: 10px; opacity: 0.85; }
+        .rem-next { margin-top: 10px; font-weight: 700; font-size: 0.9rem; color: var(--perm-orange); display: none; }
+        .rem-banner { position: fixed; top: 14px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 480px; background: #8b0000; color: #fff; border: 2px solid var(--gold); border-radius: 16px; padding: 14px 16px; z-index: 4000; font-weight: 700; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,.35); display: none; }
     </style>
 </head>
 <body onload="init()">
@@ -133,6 +148,19 @@
 
     <div id="statusLabel" style="margin-top:15px; font-size:0.9rem; font-weight:700; padding:10px; border-radius:12px; text-align:center; display:none;"></div>
 
+    <div id="remCard" class="rem-card">
+        <div class="rem-title">🔔 التذكيرات</div>
+        <label class="rem-opt" id="remStartRow"><input type="checkbox" id="remStart" checked> بداية بصمة التواجد <b id="remStartT">--:--</b></label>
+        <label class="rem-opt" id="remEndRow"><input type="checkbox" id="remEnd" checked> قبل نهاية بصمة التواجد بـ 10 دقائق <b id="remEndT">--:--</b></label>
+        <label class="rem-opt"><input type="checkbox" id="remOut" checked> وقت الانصراف <b id="remOutT">--:--</b></label>
+        <div class="rem-btns">
+            <button class="rem-btn-notify" onclick="enableReminders()">تفعيل التنبيه</button>
+            <button class="rem-btn-cal" onclick="addToCalendar()">إضافة للتقويم</button>
+        </div>
+        <div class="rem-next" id="remNext"></div>
+        <div class="rem-note" id="remNote">«تفعيل التنبيه» يشتغل والتطبيق مفتوح أو بالخلفية. للتذكير المضمون حتى لو قفلت التطبيق اختر «إضافة للتقويم».</div>
+    </div>
+
     <div class="signature-area">
         <div class="dev-label">تطوير وبرمجة</div>
         <span class="code-icon">&lt;/&gt;</span>
@@ -142,6 +170,7 @@
 </div>
 
 <button class="fab-btn" onclick="toggleFaq()">?</button>
+<div class="rem-banner" id="remBanner" onclick="this.style.display='none'"></div>
 
 <div class="faq-modal" id="faqModal">
     <div class="faq-content">
@@ -206,6 +235,7 @@
         const mins = h * 60 + m;
         
         alert.style.display = 'none'; warning.style.display = 'none'; dedMsg.style.display = 'none';
+        plan = null; updateReminderUI();
 
         if (mins < 390) { alert.innerText = "⚠️ البصمة لا تعمل قبل 6:30 ص"; alert.style.display = 'block'; return; }
         if (mins > 720) { alert.innerText = "⚠️ الحد الأقصى للحضور 12:00 م"; alert.style.display = 'block'; return; }
@@ -300,6 +330,10 @@
         }
         
         copyBtn.style.display = 'block'; 
+
+        const stampRequired = !(outM <= sStart) && !(sStart >= cutoffPresence);
+        plan = { out: outM, sStart: sStart, sEnd: Math.min(sStart + 60, 1440), required: stampRequired };
+        updateReminderUI();
     }
 
     function copyResults() {
@@ -321,6 +355,134 @@
         renderFaq(faqData.filter(i => i.q.includes(q) || i.a.includes(q)));
     }
     window.onclick = function(e) { if (e.target == document.getElementById('faqModal')) toggleFaq(); }
+
+    // ===== التذكيرات =====
+    let plan = null;
+    let remTimers = [];
+    const REM_KEY = 'basma_reminders';
+
+    function todayKey() { const d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+    function nowMins() { const d = new Date(); return d.getHours() * 60 + d.getMinutes() + d.getSeconds() / 60; }
+    function atToday(m) { const d = new Date(); d.setHours(Math.floor(m / 60), m % 60, 0, 0); return d; }
+
+    function updateReminderUI() {
+        const card = document.getElementById('remCard');
+        if (!plan) { card.style.display = 'none'; return; }
+        card.style.display = 'block';
+        document.getElementById('remStartRow').style.display = plan.required ? 'flex' : 'none';
+        document.getElementById('remEndRow').style.display = plan.required ? 'flex' : 'none';
+        document.getElementById('remStartT').innerText = fmt(plan.sStart);
+        document.getElementById('remEndT').innerText = fmt(plan.sEnd - 10);
+        document.getElementById('remOutT').innerText = fmt(plan.out);
+    }
+
+    function buildReminders() {
+        if (!plan) return [];
+        const list = [];
+        if (plan.required && document.getElementById('remStart').checked)
+            list.push({ id: 'start', at: plan.sStart, title: 'بصمة التواجد', body: 'بدأت فترة بصمة التواجد: ' + fmt(plan.sStart) + ' - ' + fmt(plan.sEnd) });
+        if (plan.required && document.getElementById('remEnd').checked)
+            list.push({ id: 'end', at: plan.sEnd - 10, title: 'تنبيه: بصمة التواجد', body: 'باقي 10 دقائق على نهاية فترة بصمة التواجد (' + fmt(plan.sEnd) + ')' });
+        if (document.getElementById('remOut').checked)
+            list.push({ id: 'out', at: plan.out, title: 'وقت الانصراف', body: 'حان وقت انصرافك: ' + fmt(plan.out) });
+        return list;
+    }
+
+    function setRemNote(t) { document.getElementById('remNote').innerText = t; }
+
+    async function enableReminders() {
+        const items = buildReminders().filter(r => r.at > nowMins());
+        if (!items.length) { setRemNote('ما فيه أوقات قادمة اليوم للتذكير فيها.'); return; }
+        const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+        const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+        if (!('Notification' in window)) {
+            setRemNote(isIOS && !standalone
+                ? 'بالآيفون لازم تثبّت التطبيق على الشاشة الرئيسية أول (Safari ← مشاركة ← إضافة إلى الشاشة الرئيسية)، أو استخدم «إضافة للتقويم».'
+                : 'جهازك ما يدعم التنبيهات من المتصفح. استخدم «إضافة للتقويم».');
+            return;
+        }
+        let perm = Notification.permission;
+        if (perm === 'default') perm = await Notification.requestPermission();
+        if (perm !== 'granted') { setRemNote('التنبيهات مقفلة لهالتطبيق. فعّلها من إعدادات الجوال، أو استخدم «إضافة للتقويم».'); return; }
+        try { localStorage.setItem(REM_KEY, JSON.stringify({ day: todayKey(), items: items })); } catch (e) {}
+        scheduleReminders(items);
+        setRemNote('تم تفعيل ' + (items.length === 1 ? 'تنبيه واحد' : items.length + ' تنبيهات') + ' لليوم. خل التطبيق مفتوح أو بالخلفية، وللتذكير المضمون أضفها للتقويم بعد.');
+    }
+
+    function scheduleReminders(items) {
+        remTimers.forEach(clearTimeout); remTimers = [];
+        items.forEach(r => {
+            const delay = atToday(r.at) - new Date();
+            if (delay > 0 && delay < 86400000) remTimers.push(setTimeout(() => fireReminder(r), delay));
+        });
+        tickNext();
+    }
+
+    function fireReminder(r) {
+        const b = document.getElementById('remBanner');
+        b.innerText = '🔔 ' + r.title + ' — ' + r.body; b.style.display = 'block';
+        if (navigator.vibrate) navigator.vibrate([300, 150, 300]);
+        const opts = { body: r.body, icon: 'icons/icon-192x192.png', badge: 'icons/icon-192x192.png', tag: 'basma-' + r.id, renotify: true, requireInteraction: true, vibrate: [300, 150, 300] };
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then(reg => reg.showNotification(r.title, opts)).catch(() => { try { new Notification(r.title, opts); } catch (e) {} });
+        } else { try { new Notification(r.title, opts); } catch (e) {} }
+        tickNext();
+    }
+
+    function savedReminders() {
+        try { const s = JSON.parse(localStorage.getItem(REM_KEY) || 'null'); return (s && s.day === todayKey()) ? s.items : []; } catch (e) { return []; }
+    }
+
+    function tickNext() {
+        const el = document.getElementById('remNext');
+        const next = savedReminders().filter(r => r.at > nowMins()).sort((a, b) => a.at - b.at)[0];
+        if (!next) { el.style.display = 'none'; return; }
+        const left = Math.ceil(next.at - nowMins());
+        const h = Math.floor(left / 60), m = left % 60;
+        el.innerText = '⏰ التذكير الجاي: ' + next.title + ' الساعة ' + fmt(next.at) + ' (بعد ' + (h ? h + ' ساعة و ' : '') + m + ' دقيقة)';
+        el.style.display = 'block';
+        document.getElementById('remCard').style.display = 'block';
+    }
+
+    function icsTime(d) { const p = n => String(n).padStart(2, '0'); return d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + 'T' + p(d.getHours()) + p(d.getMinutes()) + '00'; }
+    function icsStamp() { return new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, ''); }
+
+    function addToCalendar() {
+        if (!plan) return;
+        const ev = [];
+        const uid = Date.now();
+        if (plan.required && (document.getElementById('remStart').checked || document.getElementById('remEnd').checked)) {
+            const alarms = [];
+            if (document.getElementById('remStart').checked) alarms.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:بدأت فترة بصمة التواجد', 'TRIGGER:PT0M', 'END:VALARM');
+            if (document.getElementById('remEnd').checked) alarms.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:باقي 10 دقائق على نهاية بصمة التواجد', 'TRIGGER;RELATED=END:-PT10M', 'END:VALARM');
+            ev.push('BEGIN:VEVENT', 'UID:basma-stamp-' + uid + '@attendance', 'DTSTAMP:' + icsStamp(),
+                'DTSTART:' + icsTime(atToday(plan.sStart)), 'DTEND:' + icsTime(atToday(plan.sEnd)),
+                'SUMMARY:بصمة التواجد ' + fmt(plan.sStart) + ' - ' + fmt(plan.sEnd), ...alarms, 'END:VEVENT');
+        }
+        if (document.getElementById('remOut').checked) {
+            ev.push('BEGIN:VEVENT', 'UID:basma-out-' + uid + '@attendance', 'DTSTAMP:' + icsStamp(),
+                'DTSTART:' + icsTime(atToday(plan.out)), 'DTEND:' + icsTime(atToday(plan.out + 5)),
+                'SUMMARY:وقت الانصراف ' + fmt(plan.out),
+                'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:حان وقت الانصراف', 'TRIGGER:PT0M', 'END:VALARM', 'END:VEVENT');
+        }
+        if (!ev.length) { setRemNote('اختر تذكير واحد على الأقل.'); return; }
+        const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Basma//Attendance//AR', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', ...ev, 'END:VCALENDAR'].join('\r\n');
+        const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'basma-' + todayKey() + '.ics';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+        setRemNote('افتح الملف واضغط «إضافة» عشان تنضاف التذكيرات لتقويم جوالك.');
+    }
+
+    // استرجاع تذكيرات اليوم عند فتح التطبيق
+    window.addEventListener('load', () => {
+        const items = savedReminders();
+        if (items.length && 'Notification' in window && Notification.permission === 'granted') scheduleReminders(items);
+        setInterval(tickNext, 30000);
+    });
+
     function fmt(m) { return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`; }
 </script>
 </body>
