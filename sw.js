@@ -1,6 +1,6 @@
 // Service worker: offline cache + reminder notifications.
 // Bump CACHE_NAME on every release so phones pick up the new version.
-const CACHE_NAME = 'fingerprint-app-v3';
+const CACHE_NAME = 'fingerprint-app-v4';
 const FILES_TO_CACHE = [
   './',
   './index.html',
@@ -35,6 +35,22 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   event.respondWith(caches.match(req).then((res) => res || fetch(req)));
+});
+
+// Reminders pushed by the server arrive here even when the app is closed.
+self.addEventListener('push', (event) => {
+  let d = {};
+  try { d = event.data ? event.data.json() : {}; } catch (e) { d = { body: event.data ? event.data.text() : '' }; }
+  event.waitUntil(self.registration.showNotification(d.title || 'نظام البصمة', {
+    body: d.body || '',
+    icon: './icons/icon-192x192.png',
+    badge: './icons/icon-192x192.png',
+    tag: d.tag || 'basma',
+    renotify: true,
+    requireInteraction: true,
+    vibrate: [600, 200, 600, 200, 900],
+    data: { url: './index.html' }
+  }));
 });
 
 // Tapping a reminder opens (or focuses) the app.

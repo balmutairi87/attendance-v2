@@ -293,7 +293,8 @@
             <button class="rem-btn-cal" onclick="addToCalendar()">إضافة للتقويم</button>
         </div>
         <div class="rem-next" id="remNext"></div>
-        <div class="rem-note" id="remNote">«تفعيل التنبيه» يشتغل والتطبيق مفتوح أو بالخلفية. للتذكير المضمون حتى لو قفلت التطبيق اختر «إضافة للتقويم».</div>
+        <div class="rem-note" id="remNote">«تفعيل التنبيه» يرسل لك إشعار بالوقت حتى لو التطبيق مسكّر والشاشة مقفلة. بالآيفون لازم يكون التطبيق مثبّت على الشاشة الرئيسية.</div>
+        <button class="link-btn" onclick="testPush()" style="margin-top:4px;padding-right:0">🔔 أرسل لي تنبيه تجريبي</button>
     </section>
 
     <section class="card">
@@ -676,7 +677,8 @@
         const s = loadJSON(REM_KEY);
         if (s && s.day === todayKey()) {
             const items = (s.items || []).filter(r => r.id === 'out');
-            saveJSON(REM_KEY, { day: s.day, items: items });
+            saveJSON(REM_KEY, { day: s.day, items: items, push: s.push });
+            if (s.push) pushSchedule(items).catch(() => {});
             if ('Notification' in window && Notification.permission === 'granted') scheduleReminders(items);
             else tickNext();
         }
@@ -688,6 +690,7 @@
     function resetDay() {
         $('actEntry').value = '';
         dayState.stampDone = false;
+        if (savedPush()) pushSub(false).then(sub => sub && pushCall('/cancel', { sub })).catch(() => {});
         dropKey(DAY_KEY); dropKey(REM_KEY);
         remTimers.forEach(clearTimeout); remTimers = [];
         calculate();
@@ -749,23 +752,67 @@
 
     function setRemNote(t) { $('remNote').innerText = t; }
 
-    async function enableReminders() {
-        const items = buildReminders().filter(r => r.at > nowMins());
-        if (!items.length) { setRemNote('ما فيه أوقات قادمة اليوم للتذكير فيها.'); return; }
+    // ===== إشعارات من السيرفر (Web Push) — توصل حتى لو التطبيق مسكّر =====
+    const PUSH_API = 'https://basma-push.basma-awqaf.workers.dev';
+    function b64uToBytes(s) { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return Uint8Array.from(atob(s), c => c.charCodeAt(0)); }
+    async function pushCall(path, body) {
+        const r = await fetch(PUSH_API + path, { method: body ? 'POST' : 'GET', headers: body ? { 'Content-Type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined });
+        return r.json();
+    }
+    async function pushSub(create) {
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) return null;
+        const reg = await navigator.serviceWorker.ready;
+        let sub = await reg.pushManager.getSubscription();
+        if (!sub && create) {
+            const { key } = await pushCall('/vapid');
+            sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64uToBytes(key) });
+        }
+        return sub ? sub.toJSON() : null;
+    }
+    async function pushSchedule(items) {
+        const sub = await pushSub(true);
+        if (!sub) return false;
+        const r = await pushCall('/schedule', { sub, reminders: items.map(x => ({ rid: x.id, at: atToday(x.at).getTime(), title: x.title, body: x.body })) });
+        return !!(r && r.ok);
+    }
+    function savedPush() { const s = loadJSON(REM_KEY); return !!(s && s.day === todayKey() && s.push); }
+    async function askPermission() {
         const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
         const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
-        if (!('Notification' in window)) {
+        if (!('Notification' in window) || !('PushManager' in window)) {
             setRemNote(isIOS && !standalone
-                ? 'بالآيفون لازم تثبّت التطبيق على الشاشة الرئيسية أول (Safari ← مشاركة ← إضافة إلى الشاشة الرئيسية)، أو استخدم «إضافة للتقويم».'
-                : 'جهازك ما يدعم التنبيهات من المتصفح. استخدم «إضافة للتقويم».');
-            return;
+                ? 'بالآيفون لازم تثبّت التطبيق على الشاشة الرئيسية أول (Safari ← مشاركة ← إضافة إلى الشاشة الرئيسية) وتفتحه من الأيقونة.'
+                : 'جهازك ما يدعم الإشعارات من المتصفح. استخدم «إضافة للتقويم».');
+            return false;
         }
         let perm = Notification.permission;
         if (perm === 'default') perm = await Notification.requestPermission();
-        if (perm !== 'granted') { setRemNote('التنبيهات مقفلة لهالتطبيق. فعّلها من إعدادات الجوال، أو استخدم «إضافة للتقويم».'); return; }
-        saveJSON(REM_KEY, { day: todayKey(), items: items });
+        if (perm !== 'granted') { setRemNote('الإشعارات مقفلة لهالتطبيق. فعّلها من إعدادات الجوال، أو استخدم «إضافة للتقويم».'); return false; }
+        return true;
+    }
+    async function testPush() {
+        if (!(await askPermission())) return;
+        setRemNote('جاري الإرسال…');
+        try {
+            const sub = await pushSub(true);
+            const r = await pushCall('/test', { sub });
+            setRemNote(r && r.ok ? 'انرسل ✓ إذا ما وصلك خلال ثواني، تأكد إن إشعارات التطبيق مفعّلة من إعدادات الجوال.' : 'ما قدرنا نرسل التنبيه، جرّب مرة ثانية.');
+        } catch (e) { setRemNote('تأكد من اتصال الإنترنت وجرّب مرة ثانية.'); }
+    }
+
+    async function enableReminders() {
+        const items = buildReminders().filter(r => r.at > nowMins());
+        if (!items.length) { setRemNote('ما فيه أوقات قادمة اليوم للتذكير فيها.'); return; }
+        if (!(await askPermission())) return;
+        setRemNote('جاري التفعيل…');
+        let pushed = false;
+        try { pushed = await pushSchedule(items); } catch (e) {}
+        saveJSON(REM_KEY, { day: todayKey(), items: items, push: pushed });
         scheduleReminders(items);
-        setRemNote('تم تفعيل ' + (items.length === 1 ? 'تنبيه واحد' : items.length + ' تنبيهات') + ' لليوم. خل التطبيق مفتوح أو بالخلفية، وللتذكير المضمون أضفها للتقويم بعد.');
+        const n = items.length === 1 ? 'تنبيه واحد' : items.length + ' تنبيهات';
+        setRemNote(pushed
+            ? '✓ تم تفعيل ' + n + ' لليوم. بيوصلك الإشعار بالوقت حتى لو التطبيق مسكّر والشاشة مقفلة.'
+            : 'تم تفعيل ' + n + '، بس ما قدرنا نوصل للسيرفر، فالتنبيه يشتغل بس والتطبيق مفتوح. تأكد من الإنترنت واضغط «تفعيل التنبيه» مرة ثانية، أو استخدم «إضافة للتقويم».');
     }
 
     function scheduleReminders(items) {
@@ -781,6 +828,7 @@
         const b = $('remBanner');
         b.innerText = '🔔 ' + r.title + ' — ' + r.body; b.style.display = 'block';
         if (navigator.vibrate) navigator.vibrate([300, 150, 300]);
+        if (savedPush()) { tickNext(); return; }
         const opts = { body: r.body, icon: 'icons/icon-192x192.png', badge: 'icons/icon-192x192.png', tag: 'basma-' + r.id, renotify: true, requireInteraction: true, vibrate: [300, 150, 300] };
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.ready.then(reg => reg.showNotification(r.title, opts)).catch(() => { try { new Notification(r.title, opts); } catch (e) {} });
