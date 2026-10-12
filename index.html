@@ -285,7 +285,7 @@
 
     <section id="remCard" class="card rem-card">
         <div class="section-title">🔔 التذكيرات</div>
-        <label class="rem-opt" id="remStartRow"><input type="checkbox" id="remStart" checked> بداية بصمة التواجد <b id="remStartT">--:--</b></label>
+        <label class="rem-opt" id="remStartRow"><input type="checkbox" id="remStart" checked> من بداية التواجد، كل 5 دقائق لين تبصم <b id="remStartT">--:--</b></label>
         <label class="rem-opt" id="remEndRow"><input type="checkbox" id="remEnd" checked> قبل نهاية بصمة التواجد بـ 10 دقائق <b id="remEndT">--:--</b></label>
         <label class="rem-opt"><input type="checkbox" id="remOut" checked> وقت الانصراف <b id="remOutT">--:--</b></label>
         <div class="rem-btns">
@@ -741,10 +741,23 @@
     function buildReminders() {
         if (!plan) return [];
         const list = [];
-        if (plan.required && !dayState.stampDone && $('remStart').checked)
-            list.push({ id: 'start', at: plan.sStart, title: 'بصمة التواجد', body: 'بدأت فترة بصمة التواجد: ' + fmt(plan.sStart) + ' - ' + fmt(plan.sEnd) });
-        if (plan.required && !dayState.stampDone && $('remEnd').checked)
-            list.push({ id: 'end', at: plan.sEnd - 10, title: 'تنبيه: بصمة التواجد', body: 'باقي 10 دقائق على نهاية فترة بصمة التواجد (' + fmt(plan.sEnd) + ')' });
+        // بصمة التواجد: تنبيه كل 5 دقائق من البداية لين النهاية، ويوقف إذا ضغط «بصمت التواجد»
+        if (plan.required && !dayState.stampDone) {
+            const hint = ' إذا بصمت اضغط «بصمت التواجد» عشان يوقف التذكير.';
+            const lastCall = plan.sEnd - 10;
+            if ($('remStart').checked) {
+                for (let t = plan.sStart; t < plan.sEnd; t += 5) {
+                    if (t === lastCall && $('remEnd').checked) continue;
+                    const left = plan.sEnd - t;
+                    list.push({ id: 'stamp', at: t,
+                        title: t === plan.sStart ? '🔔 بدأت بصمة التواجد' : '🔔 تذكير: بصمة التواجد',
+                        body: (t === plan.sStart ? 'الفترة من ' + fmt(plan.sStart) + ' إلى ' + fmt(plan.sEnd) + '.' : 'باقي ' + left + ' دقيقة على نهاية بصمة التواجد (' + fmt(plan.sEnd) + ').') + hint });
+                }
+            }
+            if ($('remEnd').checked)
+                list.push({ id: 'stamp', at: lastCall, title: '⚠️ باقي 10 دقائق على نهاية التواجد', body: 'ابصم قبل ' + fmt(plan.sEnd) + '.' + hint });
+            list.sort((a, b) => a.at - b.at);
+        }
         if ($('remOut').checked)
             list.push({ id: 'out', at: plan.out, title: 'وقت الانصراف', body: 'حان وقت انصرافك: ' + fmt(plan.out) });
         return list;
@@ -885,7 +898,15 @@
     }
 
     // استرجاع تذكيرات اليوم عند فتح التطبيق
+    // زر «بصمت التواجد» داخل الإشعار (أندرويد)
+    if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', e => {
+        if (e.data && e.data.type === 'stamped' && plan && plan.required && !dayState.stampDone) markStamp();
+    });
     window.addEventListener('load', () => {
+        if (/[?&]stamped=1/.test(location.search)) {
+            history.replaceState(null, '', location.pathname);
+            setTimeout(() => { if (plan && plan.required && !dayState.stampDone) markStamp(); }, 300);
+        }
         const items = savedReminders();
         if (items.length && 'Notification' in window && Notification.permission === 'granted') scheduleReminders(items);
         else tickNext();

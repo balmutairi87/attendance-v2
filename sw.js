@@ -1,6 +1,6 @@
 // Service worker: offline cache + reminder notifications.
 // Bump CACHE_NAME on every release so phones pick up the new version.
-const CACHE_NAME = 'fingerprint-app-v4';
+const CACHE_NAME = 'fingerprint-app-v5';
 const FILES_TO_CACHE = [
   './',
   './index.html',
@@ -47,6 +47,7 @@ self.addEventListener('push', (event) => {
     badge: './icons/icon-192x192.png',
     tag: d.tag || 'basma',
     renotify: true,
+    actions: d.tag === 'basma-stamp' ? [{ action: 'stamped', title: '✓ بصمت التواجد' }] : [],
     requireInteraction: true,
     vibrate: [600, 200, 600, 200, 900],
     data: { url: './index.html' }
@@ -54,12 +55,23 @@ self.addEventListener('push', (event) => {
 });
 
 // Tapping a reminder opens (or focuses) the app.
+// The «بصمت التواجد» action also stops the repeating stamp reminders on the server.
+const PUSH_API = 'https://basma-push.basma-awqaf.workers.dev';
 self.addEventListener('notificationclick', (event) => {
+  const stamped = event.action === 'stamped';
   event.notification.close();
-  event.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
-      for (const c of list) { if ('focus' in c) return c.focus(); }
-      return self.clients.openWindow('./index.html');
-    })
-  );
+  event.waitUntil((async () => {
+    if (stamped) {
+      try {
+        const sub = await self.registration.pushManager.getSubscription();
+        if (sub) await fetch(PUSH_API + '/cancel', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sub: sub.toJSON(), rids: ['stamp'] }) });
+      } catch (e) {}
+      const open = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      for (const c of open) { c.postMessage({ type: 'stamped' }); if ('focus' in c) return c.focus(); }
+      return self.clients.openWindow('./index.html?stamped=1');
+    }
+    const list = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const c of list) { if ('focus' in c) return c.focus(); }
+    return self.clients.openWindow('./index.html');
+  })());
 });
